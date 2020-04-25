@@ -8,7 +8,7 @@ Want the flexibility and scalability of a Prisma GraphQL data layer, along with 
  `prisma-session-store` simplifies access to tried-and-true express session management via Prisma's database client.
 
 Based on: [memorystore](https://github.com/roccomuso/memorystore), by [roccomuso](https://github.com/roccomuso)
-  
+
  ## Usage
 
 ```javascript
