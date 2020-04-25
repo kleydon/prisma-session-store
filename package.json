@@ -1,0 +1,21 @@
+{
+  "name": "prisma-session-store",
+  "author": "Krispin Leydon",
+  "license": "MIT",
+  "version": "0.1.0",
+  "description": "Prisma express-session store",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --check-leaks --bail --no-exit test/"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "mocha": "2.5.3"
+  },
+  "standard": {
+    "env": [
+      "mocha"
+    ]
+  }
+}
