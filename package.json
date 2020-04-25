@@ -1,8 +1,8 @@
 {
-  "name": "prisma-session-store",
+  "name": "@quixo3/prisma-session-store",
   "description": "Prisma express-session store",
   "keywords": ["Prisma", "Express", "Session", "Memory", "Store"],
-  "version": "0.1.5",
+  "version": "0.1.6",
   "license": "MIT",
   "author": "Krispin Leydon",
   "repository": {
