@@ -2,9 +2,13 @@
   "name": "prisma-session-store",
   "description": "Prisma express-session store",
   "keywords": ["Prisma", "Express", "Session", "Memory", "Store"],
-  "version": "0.1.4",
+  "version": "0.1.5",
   "license": "MIT",
   "author": "Krispin Leydon",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kleydon/prisma-session-store.git"
+  },
   "main": "index.js",
   "scripts": {
     "test": "mocha --check-leaks --bail --no-exit test/"

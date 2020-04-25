@@ -9,7 +9,7 @@ Want the flexibility and scalability of a Prisma GraphQL data layer, along with 
 
 Based on: [memorystore](https://github.com/roccomuso/memorystore), by [roccomuso](https://github.com/roccomuso)
 
- ## Usage
+## Usage
 
 ```javascript
 
