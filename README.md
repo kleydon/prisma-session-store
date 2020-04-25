@@ -11,20 +11,31 @@ Based on: [memorystore](https://github.com/roccomuso/memorystore), by [roccomuso
   
  ## Usage
 ```javascript
-var  session = require('express-session')
-var  PrismaSessionStore = require('prisma-session-store')(session)
+
+var expressSession = require('express-session')
+var  PrismaSessionStore = require('prisma-session-store')(expressSession)
+
+...
 
 app.use(
   session({
     cookie: { 
-	  maxAge: 86400000 // ms
-	},
-    store: new MemoryStore({
-      checkPeriod: 86400000  // ms
-    }),
-    secret: 'a santa at nasa'
+	    maxAge: 7 * 24 * 60 * 60 * 1000 // ms
+    },
+    secret: 'a santa at nasa',
+    store: new PrismaSessionStore(
+      prisma, 
+      {
+        checkPeriod: 2 * 60 * 1000,  //ms
+        dbRecordIdIsSessionId: true,
+        dbRecordIdFunction: null,
+      }
+    )
   })
 )
+
+...
+
 ```
 
 ## Setup
@@ -34,13 +45,14 @@ app.use(
 
 2. From your **prisma.schema** file, include a session model:
 ```
-model  Session {
-  id       String  @default(cuid()) @id
-  sid      String  @unique  // Session id
-  data     String  // Session object, serialized
-  expires  DateTime  // JS/TS Date() timestamp
+model Session {
+  id        String   @id
+  sid       String   @unique 
+  data      String
+  expires   DateTime
 }
 ```
+
 3. Where types are defined, add a corresponding session type:
 ```
 ...
@@ -83,7 +95,7 @@ model  Session {
 
  Krispin Leydon ([kleydon](https://github.com/kleydon))
 
- Based on [memorystore](https://github.com/roccomuso/memorystore), by [roccomuso](https://github.com/roccomuso)
+ Based heavily on [memorystore](https://github.com/roccomuso/memorystore), by [roccomuso](https://github.com/roccomuso)
   
 
 # License
