@@ -10,6 +10,7 @@ Want the flexibility and scalability of a Prisma GraphQL data layer, along with 
 Based on: [memorystore](https://github.com/roccomuso/memorystore), by [roccomuso](https://github.com/roccomuso)
   
  ## Usage
+
 ```javascript
 
 var expressSession = require('express-session')
@@ -42,7 +43,6 @@ app.use(
 
 1. Install `prisma-session-store` (and `express-session`, if not already installed): 
 `$ npm install prisma-session-store express-session`
-
 2. From your **prisma.schema** file, include a session model:
 ```
 model Session {
@@ -52,10 +52,10 @@ model Session {
   expires   DateTime
 }
 ```
-
 3. Where types are defined, add a corresponding session type:
 ```
 ...
+
 {
   name: 'Session',
   definition(t) {
@@ -66,6 +66,7 @@ model Session {
   }
 }
 ...
+
 ```
 
 ## Options
@@ -93,9 +94,7 @@ model Session {
  
 # Author
 
- Krispin Leydon ([kleydon](https://github.com/kleydon))
-
- Based heavily on [memorystore](https://github.com/roccomuso/memorystore), by [roccomuso](https://github.com/roccomuso)
+ Krispin Leydon ([kleydon](https://github.com/kleydon)), based heavily on [memorystore](https://github.com/roccomuso/memorystore), by [roccomuso](https://github.com/roccomuso)
   
 
 # License
