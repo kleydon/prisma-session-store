@@ -1,4 +1,3 @@
-
 # prisma-session-store
 
 An  [express](https://github.com/expressjs)  session store implementation, for the [Prisma (2) Framework](https://github.com/prisma).
@@ -14,7 +13,7 @@ Based on: [memorystore](https://github.com/roccomuso/memorystore), by [roccomuso
 ```javascript
 
 var expressSession = require('express-session')
-var  PrismaSessionStore = require('prisma-session-store')(expressSession)
+var PrismaSessionStore = require('prisma-session-store')(expressSession)
 
 ...
 
