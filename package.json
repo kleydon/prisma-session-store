@@ -2,7 +2,7 @@
   "name": "prisma-session-store",
   "description": "Prisma express-session store",
   "keywords": ["Prisma", "Express", "Session", "Memory", "Store"],
-  "version": "0.1.1",
+  "version": "0.1.2",
   "license": "MIT",
   "author": "Krispin Leydon",
   "main": "index.js",
