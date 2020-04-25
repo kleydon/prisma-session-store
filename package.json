@@ -15,7 +15,7 @@
   "dependencies": {
   },
   "devDependencies": {
-    "mocha": "2.5.3"
+    "mocha": "7.1.1"
   },
   "standard": {
     "env": [
