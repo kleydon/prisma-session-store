@@ -1,5 +1,6 @@
 const assert = require('assert')
-const { PrismaClient } = require('./../../../node_modules/@prisma/client')
+const { PrismaClient } = require('./../../../@prisma/client')
+//Note: You're @prisma/client may be located in a different place
 
 const ilog = console.log; 
 const elog = console.error;
