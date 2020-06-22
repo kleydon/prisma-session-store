@@ -13,6 +13,8 @@ const PrismaSessionStore = require('../')({Store: function () {}})
 const session = { PrismaSessionStore }
 
 
+const sleep = m => new Promise(r => setTimeout(r, m))
+
 
 async function freshStore(f, prisma, options) {
   
@@ -25,7 +27,7 @@ async function freshStore(f, prisma, options) {
   }
 
   f.store = new session.PrismaSessionStore(prisma, options)
-  let store = f.store
+  const store = f.store
 
   await store.clear( async () => {
     let cleared = false
@@ -45,7 +47,7 @@ async function freshStore(f, prisma, options) {
 }
 
 
-describe('PrismaSessionStore', (done) => {
+describe('PrismaSessionStore', () => {
 
 
   afterEach( () => {
@@ -54,18 +56,19 @@ describe('PrismaSessionStore', (done) => {
   })
 
 
-  it('constructor should use default options', async (done) => {
-    const store = await freshStore(this, prisma)
+  it('constructor should use default options', async () => {
+
+    const store = await freshStore(this, prisma)   
 
     assert.ok(store.options, 'should have an option object')
     assert.equal(store.options.checkPeriod, undefined, 'checkPeriod undefined by default')
     assert.ok(store.prisma, 'should have prisma client connection')
     assert.equal(store._checkInterval, undefined, 'should not have the pruning loop')
-    done()
   })
 
 
-  it('should set options', async (done) => {
+  it('should set options', async () => {
+    
     const store = await freshStore(this, prisma, {
       checkPeriod: 10 * 1000,
       ttl: 36000,
@@ -77,31 +80,27 @@ describe('PrismaSessionStore', (done) => {
     assert.equal(store.options.ttl, 36000, 'should set the TTL')
     assert.equal(store.options.dispose, null, 'should set dispose')
     assert.equal(store.options.stale, true, 'should set stale')
-    done()
   })
 
 
-  it('should not set the interval to check for expired entries by default', async (done) => {
+  it('should not set the interval to check for expired entries by default', async () => {
     const store = await freshStore(this, prisma)
 
     assert.equal(store._checkInterval, undefined, 'should not exists')
-    done()
   })
 
 
-  it('should begin with no sessions in the database', async (done) => {
+  it('should begin with no sessions in the database', async () => {
     const store = await freshStore(this, prisma)
 
     await store.length( (err, length) => {
-      if (err) return done(err)
+      if (err) return err
       assert.equal(length, 0)
     })
-
-    done()
   })
 
 
-  it('should contain 10 items', async (done) => {
+  it('should contain 10 items', async () => {
     const store = await freshStore(this, prisma)
 
     for (var i = 0; i < 10; i++) {
@@ -110,15 +109,13 @@ describe('PrismaSessionStore', (done) => {
     }
 
     store.length( (err, length) => {
-      if (err) return done(err)
+      if (err) return err
       assert.equal(length, 10)
     })
-
-    done()
   })
 
 
-  it('should delete the first item', async (done) => {
+  it('should delete the first item', async () => {
     const store = await freshStore(this, prisma)
 
     for (var i = 0; i < 15; i++) {
@@ -129,14 +126,13 @@ describe('PrismaSessionStore', (done) => {
     await store.destroy('sid-0')
 
     await store.length( (err, length) => {
-      if (err) return done(err)
+      if (err) return err;
       assert.equal(length, 14)
-      done()
     })
   })
 
 
-  it('should delete the last item', async (done) => {
+  it('should delete the last item', async () => {
     const store = await freshStore(this, prisma)
 
     for (var i = 0; i < 10; i++) {
@@ -147,7 +143,7 @@ describe('PrismaSessionStore', (done) => {
     await store.destroy('sid-9')
 
     await store.length( (err, length) => {
-      if (err) return done(err)
+      if (err) return err
       assert.equal(length, 9)
     })
 
@@ -157,60 +153,55 @@ describe('PrismaSessionStore', (done) => {
     }
 
     await store.length( (err, length) => {
-      if (err) return done(err)
+      if (err) return err
       assert.equal(length, 12)
-      done()
     })
   })
 
 
-  it('should fail gracefully when attempting to delete non-existent item', async (done) => {
+  it('should fail gracefully when attempting to delete non-existent item', async () => {
     const store = await freshStore(this, prisma)
 
     await store.destroy('sid-0')
 
     await store.length( (err, length) => {
-      if (err) return done(err)
+      if (err) return err
       assert.equal(length, 0)
-      done()
     })
   })
 
 
-  it('should fail gracefully when attempting to get a non-existent entry', async (done) => {
+  it('should fail gracefully when attempting to get a non-existent entry', async () => {
     const store = await freshStore(this, prisma)
 
     await store.get('sid-0', (err, val) => {
-      if (err) return done(err)
+      if (err) return err
       assert.equal(val, undefined, 'got undefined')
-      done()
     })
   })
 
 
-  it('should fail gracefully when attempting to touch a non-existent entry', async (done) => {
+  it('should fail gracefully when attempting to touch a non-existent entry', async () => {
     const store = await freshStore(this, prisma)
 
     await store.touch('sid-0', {cookie: {maxAge: 300}}, (err, val) => {
-      if (err) return done(err)
-      done()
+      if (err) return err
     })
   })
 
 
-  it('should set and get a sample entry', async (done) => {
+  it('should set and get a sample entry', async () => {
     const store = await freshStore(this, prisma)
 
     await store.set('sid-0', {cookie: {}, sample: true})
     await store.get('sid-0', (err, val) => {
-      if (err) return done(err)
+      if (err) return err
       assert.equal(val.sample, true, 'set and got expected value')
-      done()
     })
   })
 
 
-  it('should set TTL from cookie.maxAge', async (done) => {
+  it('should set TTL from cookie.maxAge', async () => {
     const store = await freshStore(this, prisma, { checkPeriod: 50})
 
     await store.set('sid-0', {cookie: {maxAge: 400}, sample: true})
@@ -219,117 +210,115 @@ describe('PrismaSessionStore', (done) => {
       assert.equal(val.sample, true, 'entry should be valid')
     })
 
-    setTimeout(async () => {
-      await store.get('sid-0', (err, val) => {
 
-        //ilog(val);
-        //let expires = (new Date).valueOf() + val.cookie.maxAge
-        //ilog('TEST() ' + 'expires:' + expires + ' now:' + (new Date).valueOf() );
-
-        if (err) return done(err)
-        assert.equal(val, undefined, 'entry should be expired')
-        done()
-      })
-    }, 500) //500
-  })
-
-
-  it('should not get empty entry', async (done) => {
-    const store = await freshStore(this, prisma)
-
-    await store.get('', (err, val) => {
-      if (err) return done(err)
-      assert.equal(val, undefined)
-      done()
+    await sleep(500);
+    await store.get('sid-0', (err, val) => {
+      //ilog(val);
+      //let expires = (new Date).valueOf() + val.cookie.maxAge
+      //ilog('TEST() ' + 'expires:' + expires + ' now:' + (new Date).valueOf() );
+      if (err) return err
+      assert.equal(val, undefined, 'entry should be expired')
     })
   })
 
 
-  it('should not get a deleted entry', async (done) => {
+  it('should not get empty entry', async () => {
+    const store = await freshStore(this, prisma)
+
+    await store.get('', (err, val) => {
+      if (err) return err
+      assert.equal(val, undefined)
+    })
+  })
+
+
+  it('should not get a deleted entry', async () => {
     const store = await freshStore(this, prisma)
 
     await store.set('sid-0', {cookie: {}})
     await store.get('sid-0', async (err, val) => {
-      if (err) return done(err)
+      if (err) return err
       assert.ok(val, 'entry exists')
       await store.destroy('sid-0')
       await store.get('sid-0', (err, val) => {
-        if (err) return done(err)
+        if (err) return err
         assert.equal(val, undefined, 'requested entry previously deleted')
-        done()
       })
     })
   })
 
 
-  it('should not get an expired entry', async (done) => {
+  it('should not get an expired entry', async () => {
     const store = await freshStore(this, prisma, {checkPeriod: 50})
 
     await store.set('sid-0', {cookie: {maxAge: 200}, sample: true})
-    setTimeout(async () => {
-      await store.get('sid-0', (err, val) => {
-        if (err) return done(err)
-        assert.equal(val, undefined, 'entry should be expired')
-        done()
-      })
-    }, 300)
+
+    await sleep(500);
+
+    await store.get('sid-0', (err, val) => {
+      if (err) return err
+      assert.equal(val, undefined, 'entry should be expired')
+    })
   })
 
 
-  it('should enable automatic prune for expired entries', async (done) => {
-    const store = await freshStore(this, prisma, {checkPeriod: 300})
+  it('should enable automatic prune for expired entries', async () => {
 
-    await store.set('sid-0', {cookie: {maxAge: 150}})
-    await store.set('sid-1', {cookie: {maxAge: 150}})
+    const store = await freshStore(this, prisma, {checkPeriod: 100})
+
+    await store.set('sid-0', {cookie: {maxAge: 50}})
+    await store.set('sid-1', {cookie: {maxAge: 50}})
     await store.length( (err, count) => {
-      if (err) return done(err)
+      if (err) return err
       assert.equal(count, 2, 'should count 2 entries')
     })
-    setTimeout(async () => {
-      await store.length( (err, count) => {
-        if (err) return done(err)
-        assert.equal(count, 0, 'expired entries should be pruned')
-        done()
-      })
-    }, 500)
+
+    await sleep(300)
+
+    await store.length( (err, count) => {
+      if (err) return err
+      assert.equal(count, 0, 'expired entries should be pruned')
+    })
   })
 
 
-  it('automatic check for expired entries should be disabled', async (done) => {
+  it('automatic check for expired entries should be disabled', async () => {
+
     const store = await freshStore(this, prisma)
 
     await store.set('sid-0', {cookie: {maxAge: 150}})
     await store.set('sid-1', {cookie: {maxAge: 150}})
     await store.length( (err, count) => {
-      if (err) return done(err)
+      if (err) return err
       assert.equal(count, 2, 'should count 2 entries')
     })
-    setTimeout(async () => {
-      await store.length( (err, count) => {
-        if (err) return done(err)
-        assert.equal(count, 2, 'expired entries should not be pruned')
-        done()
-      })
-    }, 500)
+
+    await sleep(500)
+
+    await store.length( (err, count) => {
+      if (err) return err
+      assert.equal(count, 2, 'expired entries should not be pruned')
+      return
+    })
   })
 
 
-  it('should touch a given entry', async (done) => {
+  it('should touch a given entry', async () => {
     const store = await freshStore(this, prisma)
 
     await store.set('sid-0', {cookie: {maxAge: 50}})
     await store.touch('sid-0', {cookie: {maxAge: 300}})
-    setTimeout(async () => {
-      await store.get('sid-0', (err, val) => {
-        if (err) return done(err)
-        assert.ok(val, 'entry should be touched')
-        done()
-      })
-    }, 200)
+
+    await sleep(200)
+
+    await store.get('sid-0', (err, val) => {
+      if (err) return err
+      assert.ok(val, 'entry should be touched')
+    })
   })
 
 
-  it('should fetch all entries Ids', async (done) => {
+  it('should fetch all entries Ids', async () => {
     const store = await freshStore(this, prisma)
 
     var k = 10
@@ -339,19 +328,16 @@ describe('PrismaSessionStore', (done) => {
     }
 
     await store.ids( (err, ids) => {
-      if (err) return done(err)
-
+      if (err) return err
       assert.ok(Array.isArray(ids), 'ids should be an Array')
-      
       for (let i=0; i<ids.length;i++) {
         assert.equal(ids[i], 'sid-'+(i), 'got expected key')
       } 
-      done()
     })
   })
 
 
-  it('should fetch all entries values', async (done) => {
+  it('should fetch all entries values', async () => {
     const store = await freshStore(this, prisma)
 
     var k = 10
@@ -359,18 +345,17 @@ describe('PrismaSessionStore', (done) => {
     for (i = 0; i < k; i++) { await store.set('sid-'+i, {cookie: {maxAge: 1000}, i: i}) }
 
     await store.all( (err, all) => {
-      if (err) return done(err)
+      if (err) return err
       assert.equal(typeof all, 'object', 'all should be an Object')
       Object.keys(all).forEach( (sid) => {
         var v = sid.split('-')[1]
         assert.equal(all[sid].i, v, 'got expected value')
       })
-      done()
     })
   })
 
 
-  it('should count all entries in the store', async (done) => {
+  it('should count all entries in the store', async () => {
     const store = await freshStore(this, prisma)
 
     var k = 10
@@ -378,14 +363,13 @@ describe('PrismaSessionStore', (done) => {
     for (i = 0; i < k; i++) { await store.set('sid-'+i, {cookie: {maxAge: 1000}}) }
 
     await store.length( (err, n) => {
-      if (err) return done(err)
-      assert.equal(n, k, 'Got expected lenght')
-      done()
+      if (err) return err
+      assert.equal(n, k, 'Got expected length')
     })
   })
 
 
-  it('should delete all entries from the store', async (done) => {
+  it('should delete all entries from the store', async () => {
     const store = await freshStore(this, prisma)
 
     var k = 10
@@ -393,14 +377,13 @@ describe('PrismaSessionStore', (done) => {
     for (i = 0; i < k; i++) { await store.set('sid'+i, {cookie: {maxAge: 1000}}) }
 
     await store.length( (err, n) => {
-      if (err) return done(err)
+      if (err) return err
       assert.equal(n, k, 'store is not empty')
     })
     await store.clear()
     await store.length( (err, n) => {
-      if (err) return done(err)
+      if (err) return err
       assert.equal(n, 0, 'store should be empty')
-      done()
     })
   })
 })

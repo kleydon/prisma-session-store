@@ -2,7 +2,7 @@
   "name": "@quixo3/prisma-session-store",
   "description": "Prisma express-session store",
   "keywords": ["Prisma", "Express", "Session", "Memory", "Store"],
-  "version": "0.1.7",
+  "version": "0.2.0",
   "license": "MIT",
   "author": "Krispin Leydon",
   "repository": {
@@ -19,7 +19,7 @@
   "dependencies": {
   },
   "devDependencies": {
-    "mocha": "7.1.1"
+    "mocha": "8.0.1"
   },
   "standard": {
     "env": [
