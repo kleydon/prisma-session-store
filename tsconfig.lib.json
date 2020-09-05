@@ -1,6 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "outDir": "dist",
     "tsBuildInfoFile": "./.build-cache/lib"
   },
   "exclude": ["**/*.spec.ts", "**/mocks/**/*.ts"],

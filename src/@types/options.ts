@@ -1,24 +1,22 @@
-import { PartialDeep } from 'type-fest';
+import type { PartialDeep } from 'type-fest';
 import { ILevel, ILogger } from './logger';
+import { ISerializer } from './serializer';
+
+export type TTLFactory = (
+  options: IOptions,
+  session: PartialDeep<Express.SessionData>,
+  sid: string
+) => number;
 
 export interface IOptions {
-  ttl?:
-    | number
-    | ((
-        options: IOptions,
-        sess: PartialDeep<Express.SessionData>,
-        sid: string
-      ) => number);
+  ttl?: number | TTLFactory;
   checkPeriod?: number;
   dbRecordIdIsSessionId?: boolean;
   dbRecordIdFunction?: Function;
   dispose?: Function;
   stale?: boolean;
   noDisposeOnSet?: boolean;
-  serializer?: {
-    parse: (string: string) => object;
-    stringify: (object: object) => string;
-  };
+  serializer?: ISerializer;
   logger?: ILogger | false;
   loggerLevel?: ILevel | ILevel[];
 }

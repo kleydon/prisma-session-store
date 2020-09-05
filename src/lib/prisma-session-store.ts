@@ -189,13 +189,10 @@ export default ({ Store }: ISession) => {
      * @param callback
      */
     public all = async (callback?: (err?: any, all?: any) => void) => {
-      const prisma = this.prisma;
-      const serializer = this.serializer;
-
       try {
-        const sessions = await prisma.session.findMany();
+        const sessions = await this.prisma.session.findMany();
         const result = sessions
-          .map(({ sid, data }) => [sid, serializer.parse(data ?? '{}')])
+          .map(({ sid, data }) => [sid, this.serializer.parse(data ?? '{}')])
           .reduce((prev, [sid, data]) => ({ ...prev, [sid]: data }), {});
         if (callback) defer(callback, null, result);
       } catch (e) {

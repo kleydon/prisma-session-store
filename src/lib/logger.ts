@@ -12,14 +12,14 @@ export class Logger {
   }
 
   public log(message: string): void {
-    if (this.logger && this.checkLevel('log')) this.logger.log(message);
+    if (this.logger && this.checkLevel('log')) this.logger.log?.(message);
   }
 
   public warn(message: string): void {
-    if (this.logger && this.checkLevel('warn')) this.logger.warn(message);
+    if (this.logger && this.checkLevel('warn')) this.logger.warn?.(message);
   }
 
   public error(error: unknown): void {
-    if (this.logger && this.checkLevel('error')) this.logger.error(error);
+    if (this.logger && this.checkLevel('error')) this.logger.error?.(error);
   }
 }

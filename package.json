@@ -6,7 +6,8 @@
     "Express",
     "Session",
     "Memory",
-    "Store"
+    "Store",
+    "TypeScript"
   ],
   "version": "0.3.0",
   "license": "MIT",
@@ -23,6 +24,11 @@
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "test": "jest",
     "build": "tsc --build tsconfig.lib.json"
@@ -30,7 +36,9 @@
   "engines": {
     "node": ">=10.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "type-fest": "^0.16.0"
+  },
   "peerDependencies": {
     "@prisma/client": "*",
     "express-session": "*"
@@ -44,7 +52,6 @@
     "@types/node": "^14.6.4",
     "jest": "^26.4.2",
     "ts-jest": "^26.3.0",
-    "type-fest": "^0.16.0",
     "typescript": "^4.0.2"
   }
 }
