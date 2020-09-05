@@ -61,3 +61,6 @@ build/Release
 .pnp.*
 # ---------------------------------------
 
+# TypeScript compiled files
+dist
+
