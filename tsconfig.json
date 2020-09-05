@@ -12,7 +12,6 @@
     "target": "es5",
     "module": "commonjs",
     "esModuleInterop": true,
-    "rootDir": "src",
     "declaration": true,
     "forceConsistentCasingInFileNames": true,
     "composite": true,
