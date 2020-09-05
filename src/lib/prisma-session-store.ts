@@ -62,6 +62,7 @@ export default ({ Store }: ISession) => {
         const result = this.serializer.parse(session.data ?? '{}');
         if (callback) defer(callback, null, result);
       } catch (e) {
+        this.logger.error(`get(): ${e}`);
         if (callback) defer(callback, e);
       }
     };
@@ -89,6 +90,7 @@ export default ({ Store }: ISession) => {
       try {
         sessionString = this.serializer.stringify(session);
       } catch (e) {
+        this.logger.error(`set(): ${e}`);
         if (callback) defer(callback, e);
       }
 
@@ -162,7 +164,7 @@ export default ({ Store }: ISession) => {
         // *** If there is no found session, for some reason, should it be recreated from sess *** ?
         if (callback) defer(callback);
       } catch (e) {
-        this.logger.log('touch(): ' + e);
+        this.logger.error(`touch(): ${e}`);
         if (callback) defer(callback, e);
       }
     };
@@ -196,6 +198,7 @@ export default ({ Store }: ISession) => {
           .reduce((prev, [sid, data]) => ({ ...prev, [sid]: data }), {});
         if (callback) defer(callback, null, result);
       } catch (e) {
+        this.logger.error(`all(): ${e}`);
         if (callback) defer(callback, e);
       }
     };

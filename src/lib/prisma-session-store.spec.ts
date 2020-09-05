@@ -315,4 +315,48 @@ describe('PrismaSessionStore', () => {
       expect(n).toBe(0);
     });
   });
+
+  it('should use the injected logger', async () => {
+    const log = jest.fn();
+    const warn = jest.fn();
+
+    store = await freshStore(prisma, {
+      logger: {
+        log,
+        warn,
+      },
+      loggerLevel: ['log', 'warn'],
+    });
+
+    // Function that calls warn
+    await store.destroy('non-existent-sid');
+
+    // Function that calls log
+    await store.prune();
+
+    expect(warn).toHaveBeenCalled();
+    expect(log).toHaveBeenCalled();
+  });
+
+  it('should respect logger level', async () => {
+    const log = jest.fn();
+    const warn = jest.fn();
+
+    store = await freshStore(prisma, {
+      logger: {
+        log,
+        warn,
+      },
+      loggerLevel: ['warn'],
+    });
+
+    // Function that calls warn
+    await store.destroy('non-existent-sid');
+
+    // Function that calls log
+    await store.prune();
+
+    expect(warn).toHaveBeenCalled();
+    expect(log).not.toHaveBeenCalled();
+  });
 });
