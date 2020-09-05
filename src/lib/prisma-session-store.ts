@@ -1,5 +1,6 @@
 import type { PartialDeep } from 'type-fest';
 import cuid from 'cuid';
+import { dedent } from 'ts-dedent';
 
 import type { IOptions, IPrisma, IPrismaSession, ISession } from '../@types';
 import { getTTL, defer, createExpiration } from './utils';
@@ -24,7 +25,16 @@ export default (session: ISession) => {
     ) {
       super(prisma);
       this.startInterval();
-      this.prisma.$connect();
+      this.prisma.$connect?.();
+
+      (
+        this.prisma?.session?.findMany({ select: { sid: true } }) ??
+        new Promise((_resolve, reject) => reject())
+      ).catch(() =>
+        this.logger.error(dedent`Could not connect to Sessions model in Prisma.
+        Please make sure that prisma is setup correctly and that your migrations are current.
+        For more information check out https://github.com/kleydon/prisma-session-store`)
+      );
     }
 
     /**
