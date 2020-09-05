@@ -2,6 +2,9 @@ import { PrismaClient } from '@prisma/client';
 import express from 'express';
 import session from 'express-session';
 import request from 'supertest';
+import { execSync } from 'child_process';
+import { existsSync } from 'fs';
+import { join } from 'path';
 
 import prismaSessionStore from '../src';
 
@@ -12,6 +15,10 @@ describe('integration testing', () => {
   const prisma = new PrismaClient();
 
   beforeAll(() => {
+    if (!existsSync(join(__dirname, '../prisma/dev.db'))) {
+      execSync('prisma migrate up --experimental --create-db');
+    }
+
     app.use(
       session({
         secret: 'something',

@@ -64,3 +64,6 @@ build/Release
 # TypeScript compiled files
 dist
 .build-cache
+
+# Testing
+prisma/dev.db
