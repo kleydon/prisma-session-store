@@ -63,4 +63,4 @@ build/Release
 
 # TypeScript compiled files
 dist
-
+.build-cache

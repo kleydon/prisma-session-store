@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 
-import type { Options } from './@types';
-import { MockStore } from './mocks';
+import type { IOptions } from '../@types';
+import { MockStore } from '../mocks';
 import { createExpiration, range, sleep } from './utils/testing';
 
 import prismSessionStore from './prisma-session-store';
@@ -9,7 +9,7 @@ import prismSessionStore from './prisma-session-store';
 const prisma = new PrismaClient();
 const PrismaSessionStore = prismSessionStore({ Store: MockStore });
 
-const freshStore = async (prisma: PrismaClient, options: Options = {}) => {
+const freshStore = async (prisma: PrismaClient, options: IOptions = {}) => {
   const store = new PrismaSessionStore(prisma, {
     logger: false,
     dbRecordIdIsSessionId: !options.dbRecordIdFunction,

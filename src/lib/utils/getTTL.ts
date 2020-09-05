@@ -1,9 +1,9 @@
-import { Options } from '../@types';
+import { IOptions } from '../../@types';
 import { PartialDeep } from 'type-fest';
 import { ONE_DAY } from './constants';
 
 export const getTTL = (
-  options: Options,
+  options: IOptions,
   session: PartialDeep<Express.SessionData>,
   sid: string
 ) => {

@@ -21,10 +21,11 @@
   "bugs": {
     "url": "https://github.com/kleydon/prisma-session-store/issues"
   },
-  "main": "dist/prisma-session-store.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "jest",
-    "build": "tsc"
+    "build": "tsc --build tsconfig.lib.json"
   },
   "engines": {
     "node": ">=10.0"

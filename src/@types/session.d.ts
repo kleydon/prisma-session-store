@@ -1,5 +1,5 @@
 import type { Store } from 'express-session';
 
-export interface Session {
+export interface ISession {
   Store: typeof Store;
 }

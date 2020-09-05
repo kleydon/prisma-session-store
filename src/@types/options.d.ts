@@ -1,10 +1,11 @@
 import { PartialDeep } from 'type-fest';
+import { ILevel, ILogger } from './logger';
 
-export interface Options {
+export interface IOptions {
   ttl?:
     | number
     | ((
-        options: Options,
+        options: IOptions,
         sess: PartialDeep<Express.SessionData>,
         sid: string
       ) => number);
@@ -18,10 +19,6 @@ export interface Options {
     parse: (string: string) => object;
     stringify: (object: object) => string;
   };
-  logger?:
-    | {
-        log: (message: string) => void;
-        error: (message: string) => void;
-      }
-    | false;
+  logger?: ILogger | false;
+  loggerLevel?: ILevel | ILevel[];
 }

@@ -1,4 +1,7 @@
 {
   "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./.build-cache/spec"
+  },
   "include": ["**/*.spec.ts", "**/mocks/**/*.ts", "**/*.d.ts", "**/*.ts"]
 }
