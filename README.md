@@ -150,6 +150,7 @@ CUID will be used instead.
 
 - `startInterval()` and `stopInterval()` methods to start/clear the automatic check for expired.
 - `prune()` that you can use to manually remove only the expired entries from the store.
+- `shutdown()` that can be used to stop any intervals and disconnect from prisma.
 
 ## Author
 
