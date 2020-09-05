@@ -31,7 +31,8 @@
   ],
   "scripts": {
     "test": "jest",
-    "build": "tsc --build tsconfig.lib.json"
+    "build": "tsc --build tsconfig.lib.json",
+    "postinstall": "prisma generate"
   },
   "engines": {
     "node": ">=10.0"
