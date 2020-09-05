@@ -26,6 +26,7 @@ interface IFindManyArgs {
   select?: {
     expires?: boolean;
     sid?: boolean;
+    data?: boolean;
   };
 }
 

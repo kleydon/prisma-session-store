@@ -232,10 +232,14 @@ export default (session: ISession) => {
      */
     public all = async (callback?: (err?: unknown, all?: any) => void) => {
       try {
-        const sessions = await this.prisma.session.findMany();
+        const sessions = await this.prisma.session.findMany({
+          select: { sid: true, data: true },
+        });
+
         const result = sessions
           .map(({ sid, data }) => [sid, this.serializer.parse(data ?? '{}')])
           .reduce((prev, [sid, data]) => ({ ...prev, [sid]: data }), {});
+
         if (callback) defer(callback, undefined, result);
       } catch (e: unknown) {
         this.logger.error(`all(): ${e}`);
