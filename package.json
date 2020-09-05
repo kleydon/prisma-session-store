@@ -37,6 +37,7 @@
     "node": ">=10.0"
   },
   "dependencies": {
+    "cuid": "^2.1.8",
     "type-fest": "^0.16.0"
   },
   "peerDependencies": {

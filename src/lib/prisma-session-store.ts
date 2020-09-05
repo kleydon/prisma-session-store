@@ -1,21 +1,22 @@
-import type { IOptions, IPrisma, IPrismaSession, ISession } from '../@types';
 import type { PartialDeep } from 'type-fest';
+import cuid from 'cuid';
 
-import { getTTL, defer } from './utils';
-import { Logger } from './logger';
+import type { IOptions, IPrisma, IPrismaSession, ISession } from '../@types';
+import { getTTL, defer, createExpiration } from './utils';
+import { ManagedLogger } from './logger';
 
 /**
- * Return the `PrismaSessionStore` extending `express`'s session Store.
+ * Returns a `PrismaSessionStore` extending the `session` Store class.
  *
- * @param express session
+ * @param session the `express-session` object which will be used to extend a store from
  */
-export default ({ Store }: ISession) => {
-  return class PrismaSessionStore extends Store {
+export default (session: ISession) => {
+  return class PrismaSessionStore extends session.Store {
     /**
      * Initialize PrismaSessionStore with the given `prisma` and (optional) `options`.
      *
-     * @param prisma
-     * @param options
+     * @param prisma the prisma client that includes a `Sessions` model
+     * @param options the options to alter how this store behaves
      */
     constructor(
       private readonly prisma: IPrisma,
@@ -26,29 +27,64 @@ export default ({ Store }: ISession) => {
       this.prisma.$connect();
     }
 
-    public async shutdown() {
-      this.stopInterval();
-      await this.prisma.$disconnect();
-    }
-
+    /**
+     * @private
+     * @description The currently active interval created with `startInterval()` and removed with `stopInterval()`
+     * @type {NodeJS.Timeout}
+     */
     private _checkInterval?: NodeJS.Timeout;
+
+    /**
+     * @private
+     * @description A function to generate the Prisma Record ID for a given session ID
+     *
+     * Note: If undefined and dbRecordIdIsSessionId is also undefined then a random
+     * CUID will be used instead.
+     */
     private dbRecordIdFunction = this.options.dbRecordIdFunction;
+
+    /**
+     * @private
+     * @description Some serializer that will transform objects into strings
+     * and vice versa
+     */
     private serializer = this.options.serializer ?? JSON;
+
+    /**
+     * @private
+     * @description A flag indicating to use the session ID as the Prisma Record ID
+     *
+     * Note: If undefined and dbRecordIdFunction is also undefined then a random
+     * CUID will be used instead.
+     */
     private dbRecordIdIsSessionId = this.options.dbRecordIdIsSessionId;
-    private logger = new Logger(
+
+    /**
+     * @private
+     * @description A object that handles logging to a given logger based on the logging level
+     */
+    private logger = new ManagedLogger(
       this.options.logger ?? console,
       this.options.loggerLevel ?? ['error']
     );
 
     /**
+     * A function to stop any ongoing intervals and disconnect from the `PrismaClient`
+     */
+    public async shutdown() {
+      this.stopInterval();
+      await this.prisma.$disconnect();
+    }
+
+    /**
      * Attempt to fetch session by the given `sid`.
      *
-     * @param sid
-     * @param callback
+     * @param sid the sid to attempt to fetch
+     * @param callback a function to call with the results
      */
     public get = async (
       sid: string,
-      callback: (err?: any, val?: any) => void
+      callback: (err?: unknown, val?: any) => void
     ) => {
       const session: IPrismaSession | null = await this.prisma.session
         .findOne({
@@ -60,85 +96,83 @@ export default ({ Store }: ISession) => {
 
       try {
         const result = this.serializer.parse(session.data ?? '{}');
-        if (callback) defer(callback, null, result);
-      } catch (e) {
+        if (callback) defer(callback, undefined, result);
+      } catch (e: unknown) {
         this.logger.error(`get(): ${e}`);
         if (callback) defer(callback, e);
       }
     };
 
     /**
-     * Commit the given `sess` object associated with the given `sid`.
+     * Commit the given `session` object associated with the given `sid`.
      *
-     * @param sid
-     * @param session
-     * @param callback
+     * @param sid the ID to save the session data under
+     * @param session the session data to save
+     * @param callback a callback with the results of saving the data
+     * or an error that occurred
      */
     public set = async (
       sid: string,
       session: PartialDeep<Express.SessionData>,
-      callback?: (err?: any) => void
+      callback?: (err: unknown) => void
     ) => {
-      const prisma = this.prisma;
-      const dbRecordIdFunction = this.dbRecordIdFunction;
-      const dbRecordIdIsSessionId = this.dbRecordIdIsSessionId;
-
       const ttl = getTTL(this.options, session, sid);
-      const expires = new Date(new Date().valueOf() + ttl);
+      const expires = createExpiration(ttl);
 
       let sessionString = undefined;
       try {
         sessionString = this.serializer.stringify(session);
-      } catch (e) {
+      } catch (e: unknown) {
         this.logger.error(`set(): ${e}`);
         if (callback) defer(callback, e);
       }
 
-      const existingSession: IPrismaSession | null = await prisma.session
+      const existingSession: IPrismaSession | null = await this.prisma.session
         .findOne({
           where: { sid },
         })
         .catch(() => null);
 
       const data = {
-        id: dbRecordIdIsSessionId
+        id: this.dbRecordIdIsSessionId
           ? sid
-          : dbRecordIdFunction
-          ? dbRecordIdFunction()
-          : undefined,
+          : this.dbRecordIdFunction
+          ? this.dbRecordIdFunction(sid)
+          : cuid(),
         sid,
         data: sessionString,
         expires,
       };
 
       if (existingSession) {
-        await prisma.session.update({
+        await this.prisma.session.update({
           where: { sid },
           data,
         });
       } else if (sessionString) {
-        await prisma.session.create({
+        await this.prisma.session.create({
           data: { ...data, data: sessionString },
         });
       }
 
-      if (callback) defer(callback, null);
+      if (callback) defer(callback);
     };
 
     /**
      * Refresh the time-to-live for the session with the given `sid`.
      *
-     * @param sid
-     * @param session
-     * @param callback
+     * @param sid the id of the session to refresh
+     * @param session the data of the session to resave
+     * @param callback a callback notifying that the refresh was completed
+     * or that an error occurred
      */
     public touch = async (
       sid: string,
       session: PartialDeep<Express.SessionData>,
-      callback?: (err?: any, val?: any) => void
+      callback?: (err?: unknown) => void
     ) => {
       const ttl = getTTL(this.options, session, sid);
-      const expires = new Date(new Date().valueOf() + ttl);
+      const expires = createExpiration(ttl);
 
       try {
         const existingSession = await this.prisma.session.findOne({
@@ -163,7 +197,7 @@ export default ({ Store }: ISession) => {
 
         // *** If there is no found session, for some reason, should it be recreated from sess *** ?
         if (callback) defer(callback);
-      } catch (e) {
+      } catch (e: unknown) {
         this.logger.error(`touch(): ${e}`);
         if (callback) defer(callback, e);
       }
@@ -172,32 +206,38 @@ export default ({ Store }: ISession) => {
     /**
      * Fetch all sessions' ids
      *
-     * @param callback
+     * @param callback a callback providing all session id
+     * or an error that occurred
      */
-    public ids = async (callback?: (err?: any, ids?: number[]) => void) => {
+    public ids = async (callback?: (err?: unknown, ids?: number[]) => void) => {
       //XXX More efficient way? XXX
 
-      const sessions = await this.prisma.session.findMany({
-        select: { sid: true },
-      });
+      try {
+        const sessions = await this.prisma.session.findMany({
+          select: { sid: true },
+        });
 
-      const sids = sessions.map(({ sid }) => sid);
-      callback && defer(callback, null, sids);
+        const sids = sessions.map(({ sid }) => sid);
+        if (callback) defer(callback, undefined, sids);
+      } catch (e: unknown) {
+        if (callback) defer(callback, e);
+      }
     };
 
     /**
      * Fetch all sessions
      *
-     * @param callback
+     * @param callback a callback providing all session data
+     * or an error that occurred
      */
-    public all = async (callback?: (err?: any, all?: any) => void) => {
+    public all = async (callback?: (err?: unknown, all?: any) => void) => {
       try {
         const sessions = await this.prisma.session.findMany();
         const result = sessions
           .map(({ sid, data }) => [sid, this.serializer.parse(data ?? '{}')])
           .reduce((prev, [sid, data]) => ({ ...prev, [sid]: data }), {});
-        if (callback) defer(callback, null, result);
-      } catch (e) {
+        if (callback) defer(callback, undefined, result);
+      } catch (e: unknown) {
         this.logger.error(`all(): ${e}`);
         if (callback) defer(callback, e);
       }
@@ -206,12 +246,17 @@ export default ({ Store }: ISession) => {
     /**
      * Delete all sessions from the store
      *
-     * @param callback
+     * @param callback a callback notifying that all sessions
+     * were deleted or that an error occurred
      */
-    clear = async (callback?: (err?: any) => void) => {
-      await this.prisma.session.deleteMany();
+    public clear = async (callback?: (err?: unknown) => void) => {
+      try {
+        await this.prisma.session.deleteMany();
 
-      if (callback) defer(callback, null);
+        if (callback) defer(callback);
+      } catch (e: unknown) {
+        if (callback) defer(callback, e);
+      }
     };
 
     /**
@@ -219,19 +264,25 @@ export default ({ Store }: ISession) => {
      *
      * @param callback
      */
-    public length = async (callback?: (err?: any, length?: number) => void) => {
+    public length = async (
+      callback?: (err?: unknown, length?: number) => void
+    ) => {
       // XXX More efficient way? XXX
 
-      const sessions = await this.prisma.session.findMany({
-        select: { sid: true }, //Limit what gets sent back; can't be empty.
-      });
+      try {
+        const sessions = await this.prisma.session.findMany({
+          select: { sid: true }, //Limit what gets sent back; can't be empty.
+        });
 
-      const itemCount = sessions.length;
-      if (callback) defer(callback, null, itemCount);
+        const itemCount = sessions.length;
+        if (callback) defer(callback, undefined, itemCount);
+      } catch (e: unknown) {
+        if (callback) defer(callback, e);
+      }
     };
 
     /**
-     * Start the check interval
+     * Start an interval to prune expired sessions
      */
     public startInterval() {
       const ms = this.options.checkPeriod;
@@ -245,17 +296,18 @@ export default ({ Store }: ISession) => {
     }
 
     /**
-     * Stop the check interval
+     * Stop checking if sessions have expired
      */
     public stopInterval() {
       if (this._checkInterval) clearInterval(this._checkInterval);
     }
 
     /**
-     * Destroy the session associated with the given `sid`.
+     * Destroy the session associated with the given `sid`(s).
      *
-     * @param sid
-     * @param callback
+     * @param sid a single or multiple id(s) to remove data for
+     * @param callback a callback notifying that the session(s) have
+     * been destroyed or that an error occurred
      */
     public destroy = async (
       sid: string | string[],
@@ -274,7 +326,7 @@ export default ({ Store }: ISession) => {
         }
       }
 
-      if (callback) defer(callback, null);
+      if (callback) defer(callback);
     };
 
     /**
@@ -294,7 +346,6 @@ export default ({ Store }: ISession) => {
       for (const session of sessions) {
         const now = new Date();
         const remainingSec = (session.expires.valueOf() - now.valueOf()) / 1000;
-
         this.logger.log(`session:${session.sid} expires in ${remainingSec}sec`);
 
         if (now.valueOf() >= session.expires.valueOf()) {

@@ -1,6 +1,9 @@
 import type { Store } from 'express-session';
 import { EventEmitter } from 'events';
 
+/**
+ * A Jest Mock of a Express Session Store
+ */
 export class MockStore extends EventEmitter implements Store {
   listenerCount = jest.fn();
   regenerate = jest.fn();

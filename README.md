@@ -10,10 +10,12 @@ Based on: [memorystore](https://github.com/roccomuso/memorystore), by [roccomuso
 
 ## Usage
 
-```javascript
+### JavaScript (CommonJS)
 
-var expressSession = require('express-session')
-var PrismaSessionStore = require('prisma-session-store')(expressSession)
+```js
+
+const expressSession = require('express-session')
+const PrismaSessionStore = require('@quixo3/prisma-session-store')(expressSession)
 
 ...
 
@@ -38,11 +40,55 @@ app.use(
 
 ```
 
+### TypeScript
+
+```ts
+import expressSession from 'express-session';
+import prismaSessionStore from '@quixo3/prisma-session-store';
+
+const PrismaSessionStore = prismaSessionStore(expressSession);
+
+...
+
+app.use(
+  session({
+    cookie: {
+     maxAge: 7 * 24 * 60 * 60 * 1000 // ms
+    },
+    secret: 'a santa at nasa',
+    store: new PrismaSessionStore(
+      prisma,
+      {
+        checkPeriod: 2 * 60 * 1000,  //ms
+        dbRecordIdIsSessionId: true,
+        dbRecordIdFunction: null,
+      }
+    )
+  })
+)
+
+...
+```
+
 ## Setup
 
-1. Install `prisma-session-store` (and `express-session`, if not already installed):
-   `$ npm install prisma-session-store express-session`
-2. From your **prisma.schema** file, include a session model:
+### Install
+
+Install `@quixo3/prisma-session-store` (and `express-session`, if not already installed):
+
+#### NPM
+
+`$ npm install @quixo3/prisma-session-store express-session`
+
+#### yarn
+
+`$ yarn add @quixo3/prisma-session-store express-session`
+
+### Prisma
+
+#### Model
+
+From your **prisma.schema** file, include a session model:
 
 ```prisma
 model Session {
@@ -53,9 +99,11 @@ model Session {
 }
 ```
 
-3. Where types are defined, add a corresponding session type:
+#### Types
 
-```ts
+If you are not using TypeScript you may need to define your types like so:
+
+```js
 ...
 
 {
@@ -73,9 +121,16 @@ model Session {
 
 ## Options
 
+- `dbRecordIdIsSessionId` A flag indicating to use the session ID as the Prisma Record ID
+
+- `dbRecordIdFunction` A function to generate the Prisma Record ID for a given session ID
+
+Note: If both dbRecordIdFunction and dbRecordIdIsSessionId are undefined then a random
+CUID will be used instead.
+
 - `checkPeriod` Interval, in ms, at which PrismaSessionStore will automatically remove expired sessions. Disabled by default; set to something reasonable.
 
-- `ttl` "Time to live", in ms; defines session expiration time. Defaults to session.maxAge (if set), or one day (if not set). May alternatively be set to a function, of the form `(options, sess, sessionID) => number`.
+- `ttl` "Time to live", in ms; defines session expiration time. Defaults to session.maxAge (if set), or one day (if not set). May alternatively be set to a function, of the form `(options, session, sessionID) => number`.
 
 - `dispose` Called on sessions when they are dropped. Handy if you want to close file descriptors or do other cleanup tasks when sessions are no longer accessible. Called with `key, value`. It's called _before_ actually removing the item from the internal cache, so if you want to immediately put it back in, you'll have to do that in a `nextTick` or `setTimeout` callback or it won't do anything.
 
@@ -85,6 +140,10 @@ model Session {
 
 - `serializer` An object containing `stringify` and `parse` methods compatible with Javascript's `JSON` to override the serializer used.
 
+- `logger` Where logs should be outputted to, by default `console`. If set to `false` then logging will be disabled
+
+- `loggerLevel` Determines which logging methods to enable, by default `error` only
+
 ## Methods
 
 `prisma-session-store` implements all the **required**, **recommended** and **optional** methods of the [express-session](https://github.com/expressjs/session#session-store-implementation) store, plus a few more:
@@ -92,10 +151,10 @@ model Session {
 - `startInterval()` and `stopInterval()` methods to start/clear the automatic check for expired.
 - `prune()` that you can use to manually remove only the expired entries from the store.
 
-# Author
+## Author
 
-Krispin Leydon ([kleydon](https://github.com/kleydon)), based heavily on [memorystore](https://github.com/roccomuso/memorystore), by [roccomuso](https://github.com/roccomuso)
+Krispin Leydon ([kleydon](https://github.com/kleydon)), based heavily on [memorystore](https://github.com/roccomuso/memorystore), by [roccomuso](https://github.com/roccomuso), refactored to TypeScript by [wSedlacek](https://github.com/wSedlacek)
 
-# License
+## License
 
 MIT

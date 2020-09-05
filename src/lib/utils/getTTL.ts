@@ -2,8 +2,14 @@ import { IOptions } from '../../@types';
 import { PartialDeep } from 'type-fest';
 import { ONE_DAY } from './constants';
 
+/**
+ *  Determines the TTL (Time to Live) for a given session with given options
+ * @param options the options to determine the TTL
+ * @param session the session data
+ * @param sid the id of the current session
+ */
 export const getTTL = (
-  options: IOptions,
+  options: Pick<IOptions, 'ttl'>,
   session: PartialDeep<Express.SessionData>,
   sid: string
 ) => {
