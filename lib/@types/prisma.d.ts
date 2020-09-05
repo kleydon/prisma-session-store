@@ -1,11 +1,25 @@
 export interface PrismaSession {
   id: string;
   sid: string;
-  data: string;
+  data: string | null;
   expires: Date;
 }
 
-interface FindArgs {
+interface CreatePrismaSession extends PrismaSession {
+  data: string;
+}
+
+interface FindOneArgs {
+  where: {
+    sid: string;
+  };
+  select?: {
+    expires?: boolean;
+    sid?: boolean;
+  };
+}
+
+interface FindManyArgs {
   where?: {
     sid?: string;
   };
@@ -16,12 +30,12 @@ interface FindArgs {
 }
 
 interface CreateArgs {
-  data: PrismaSession;
+  data: CreatePrismaSession;
 }
 
 interface UpdateArgs {
   where: { sid: string };
-  data: Partial<PrismaSession>;
+  data: Partial<CreatePrismaSession>;
 }
 
 interface DeleteArgs {
@@ -32,10 +46,11 @@ export interface Prisma {
   $connect(): Promise<void>;
   $disconnect(): Promise<void>;
   session: {
-    findOne(args?: FindArgs): Promise<PrismaSession>;
-    findMany(args?: FindArgs): Promise<PrismaSession[]>;
+    findOne(args: FindOneArgs): Promise<PrismaSession | null>;
+    findMany(args?: FindManyArgs): Promise<PrismaSession[]>;
     delete(args?: DeleteArgs): Promise<PrismaSession>;
-    create(args?: CreateArgs): Promise<PrismaSession>;
-    update(args?: UpdateArgs): Promise<PrismaSession>;
+    deleteMany(args?: any): Promise<any>;
+    create(args: CreateArgs): Promise<PrismaSession>;
+    update(args: UpdateArgs): Promise<PrismaSession>;
   };
 }

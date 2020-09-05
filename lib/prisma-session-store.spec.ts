@@ -1,21 +1,15 @@
 import { PrismaClient } from '@prisma/client';
 
+import type { Options } from './@types';
+import { MockStore } from './mocks';
+import { createExpiration, range, sleep } from './utils/testing';
+
 import prismSessionStore from './prisma-session-store';
-import { MockStore } from './mocks/store.mock';
-import { Options, Prisma } from './@types';
 
 const prisma = new PrismaClient();
 const PrismaSessionStore = prismSessionStore({ Store: MockStore });
 
-const sleep = (duration: number) =>
-  new Promise((resolve) => setTimeout(resolve, duration));
-
-async function freshStore(prisma: Prisma, options: Options = {}) {
-  // If no dbRecordIdIsSessionId option given, and no dbRecordIdFunction given
-  if (!options.dbRecordIdIsSessionId && !options.dbRecordIdFunction) {
-    options.dbRecordIdIsSessionId = true;
-  }
-
+const freshStore = async (prisma: PrismaClient, options: Options = {}) => {
   const store = new PrismaSessionStore(prisma, {
     logger: false,
     dbRecordIdIsSessionId: !options.dbRecordIdFunction,
@@ -23,61 +17,27 @@ async function freshStore(prisma: Prisma, options: Options = {}) {
   });
 
   await store.clear(async () => {
-    let cleared = false;
-    while (!cleared) {
-      //console.log('Waiting for db to clear...')
-      //Ensure database has been cleared...
-      await store.length((err, length) => {
-        if (err) return console.log(err);
-        if (length === 0) cleared = true;
-      });
-    }
+    await store.length((err, length) => {
+      expect(err).toBe(null);
+      expect(length).toBe(0);
+    });
   });
 
   return store;
-}
+};
 
 describe('PrismaSessionStore', () => {
   let store: typeof PrismaSessionStore.prototype;
 
-  afterEach(() => {
-    store.stopInterval();
-    store.shutdown();
-  });
-
-  it('constructor should use default options', async () => {
-    store = await freshStore(prisma);
-    expect(store.options).toBeTruthy();
-    expect(store.options.checkPeriod).toBeUndefined();
-    expect(store.prisma).toBeTruthy();
-    expect(store._checkInterval).toBeUndefined();
-  });
-
-  it('should set options', async () => {
-    store = await freshStore(prisma, {
-      checkPeriod: 10 * 1000,
-      ttl: 36000,
-      dispose: null,
-      stale: true,
-    });
-
-    expect(store.options.checkPeriod).toBe(10 * 1000);
-    expect(store.options.ttl).toBe(36000);
-    expect(store.options.dispose).toBe(null);
-    expect(store.options.stale).toBe(true);
-  });
-
-  it('should not set the interval to check for expired entries by default', async () => {
-    store = await freshStore(prisma);
-
-    expect(store._checkInterval).toBe(undefined);
+  afterEach(async () => {
+    await store.shutdown();
   });
 
   it('should begin with no sessions in the database', async () => {
     store = await freshStore(prisma);
 
     await store.length((err, length) => {
-      if (err) return err;
+      expect(err).toBe(null);
       expect(length).toBe(0);
     });
   });
@@ -85,15 +45,14 @@ describe('PrismaSessionStore', () => {
   it('should contain 10 items', async () => {
     store = await freshStore(prisma);
 
-    for (let i = 0; i < 10; i++) {
-      let sid = '' + i;
-      await store.set(sid, {
-        cookie: { expires: new Date(new Date().valueOf() + 60 * 10 * 1000) },
+    for (const i of range(10)) {
+      await store.set(`${i}`, {
+        cookie: { expires: createExpiration(600) },
       });
     }
 
     store.length((err, length) => {
-      if (err) return err;
+      expect(err).toBe(null);
       expect(length).toBe(10);
     });
   });
@@ -101,17 +60,16 @@ describe('PrismaSessionStore', () => {
   it('should delete the first item', async () => {
     store = await freshStore(prisma);
 
-    for (var i = 0; i < 15; i++) {
-      let sid = 'sid-' + i;
-      await store.set(sid, {
-        cookie: { expires: new Date(new Date().valueOf() + 60 * 10 * 1000) },
+    for (const i of range(15)) {
+      await store.set(`sid-${i}`, {
+        cookie: { expires: createExpiration(600) },
       });
     }
 
     await store.destroy('sid-0');
 
     await store.length((err, length) => {
-      if (err) return err;
+      expect(err).toBe(null);
       expect(length).toBe(14);
     });
   });
@@ -119,29 +77,27 @@ describe('PrismaSessionStore', () => {
   it('should delete the last item', async () => {
     store = await freshStore(prisma);
 
-    for (var i = 0; i < 10; i++) {
-      let sid = 'sid-' + i;
-      await store.set(sid, {
-        cookie: { expires: new Date(new Date().valueOf() + 60 * 10 * 1000) },
+    for (const i of range(10)) {
+      await store.set(`sid-${i}`, {
+        cookie: { expires: createExpiration(600) },
       });
     }
 
     await store.destroy('sid-9');
 
     await store.length((err, length) => {
-      if (err) return err;
+      expect(err).toBe(null);
       expect(length).toBe(9);
     });
 
-    for (i = 9; i < 12; i++) {
-      let sid = 'sid-' + i;
-      await store.set(sid, {
-        cookie: { expires: new Date(new Date().valueOf() + 60 * 10 * 1000) },
+    for (const i of range(12, 9)) {
+      await store.set(`sid-${i}`, {
+        cookie: { expires: createExpiration(600) },
       });
     }
 
     await store.length((err, length) => {
-      if (err) return err;
+      expect(err).toBe(null);
       expect(length).toBe(12);
     });
   });
@@ -152,7 +108,7 @@ describe('PrismaSessionStore', () => {
     await store.destroy('sid-0');
 
     await store.length((err, length) => {
-      if (err) return err;
+      expect(err).toBe(null);
       expect(length).toBe(0);
     });
   });
@@ -161,7 +117,7 @@ describe('PrismaSessionStore', () => {
     store = await freshStore(prisma);
 
     await store.get('sid-0', (err, val) => {
-      if (err) return err;
+      expect(err).toBeUndefined();
       expect(val).toBeUndefined();
     });
   });
@@ -170,7 +126,8 @@ describe('PrismaSessionStore', () => {
     store = await freshStore(prisma);
 
     await store.touch('sid-0', { cookie: { maxAge: 300 } }, (err, val) => {
-      if (err) return err;
+      expect(err).toBeUndefined();
+      expect(val).toBeUndefined();
     });
   });
 
@@ -179,7 +136,7 @@ describe('PrismaSessionStore', () => {
 
     await store.set('sid-0', { cookie: {}, sample: true });
     await store.get('sid-0', (err, val) => {
-      if (err) return err;
+      expect(err).toBe(null);
       expect(val.sample).toBe(true);
     });
   });
@@ -189,16 +146,13 @@ describe('PrismaSessionStore', () => {
 
     await store.set('sid-0', { cookie: { maxAge: 400 }, sample: true });
     await store.get('sid-0', (err, val) => {
-      if (err) return err;
+      expect(err).toBe(null);
       expect(val.sample).toBe(true);
     });
 
     await sleep(500);
     await store.get('sid-0', (err, val) => {
-      //console.log(val);
-      //let expires = (new Date).valueOf() + val.cookie.maxAge
-      //console.log('TEST() ' + 'expires:' + expires + ' now:' + (new Date).valueOf() );
-      if (err) return err;
+      expect(err).toBeUndefined();
       expect(val).toBeUndefined();
     });
   });
@@ -207,7 +161,7 @@ describe('PrismaSessionStore', () => {
     store = await freshStore(prisma);
 
     await store.get('', (err, val) => {
-      if (err) return err;
+      expect(err).toBeUndefined();
       expect(val).toBe(undefined);
     });
   });
@@ -293,17 +247,18 @@ describe('PrismaSessionStore', () => {
   it('should fetch all entries Ids', async () => {
     store = await freshStore(prisma);
 
-    var k = 10;
-    var i = 0;
-    for (i = 0; i < k; i++) {
-      await store.set('sid-' + i, { cookie: { maxAge: 1000 } });
+    const TEN = 10;
+    for (const i of range(TEN)) {
+      await store.set(`sid-${i}`, { cookie: { maxAge: 1000 } });
     }
 
     await store.ids((err, ids) => {
       if (err) return err;
       expect(Array.isArray(ids)).toBeTruthy();
-      for (let i = 0; i < ids.length; i++) {
-        expect(ids[i]).toBe(`sid-${i}`);
+      if (ids) {
+        for (const i of range(ids.length)) {
+          expect(ids[i]).toBe(`sid-${i}`);
+        }
       }
     });
   });
@@ -312,16 +267,16 @@ describe('PrismaSessionStore', () => {
     store = await freshStore(prisma);
 
     const TEN = 10;
-    for (let i = 0; i < TEN; i++) {
-      await store.set('sid-' + i, { cookie: { maxAge: 1000 }, i: i });
+    for (const i of range(TEN)) {
+      await store.set(`sid-${i}`, { cookie: { maxAge: 1000 }, i: i });
     }
 
     await store.all((err, all) => {
       if (err) return err;
       expect(typeof all).toBe('object');
       Object.keys(all).forEach((sid) => {
-        const v = parseInt(sid.split('-')[1], 10);
-        expect(all[sid].i).toBe(v);
+        const value = parseInt(sid.split('-')[1], 10);
+        expect(all[sid].i).toBe(value);
       });
     });
   });
@@ -330,8 +285,8 @@ describe('PrismaSessionStore', () => {
     store = await freshStore(prisma);
 
     const TEN = 10;
-    for (let i = 0; i < TEN; i++) {
-      await store.set('sid-' + i, { cookie: { maxAge: 1000 } });
+    for (const i of range(TEN)) {
+      await store.set(`sid-${i}`, { cookie: { maxAge: 1000 } });
     }
 
     await store.length((err, n) => {
@@ -344,8 +299,8 @@ describe('PrismaSessionStore', () => {
     store = await freshStore(prisma);
 
     const TEN = 10;
-    for (let i = 0; i < TEN; i++) {
-      await store.set('sid' + i, { cookie: { maxAge: 1000 } });
+    for (const i of range(TEN)) {
+      await store.set(`sid${i}`, { cookie: { maxAge: 1000 } });
     }
 
     await store.length((err, n) => {

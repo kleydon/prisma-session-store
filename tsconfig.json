@@ -1,11 +1,22 @@
 {
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ],
   "compilerOptions": {
+    "strict": true,
     "outDir": "dist",
     "target": "es5",
     "module": "commonjs",
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "composite": true
   },
-  "exclude": ["**/*.spec.ts", "**/*.mock.ts"],
-  "include": ["lib"]
+  "exclude": ["node_modules"],
+  "include": [],
+  "files": []
 }
