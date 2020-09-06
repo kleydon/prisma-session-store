@@ -61,10 +61,6 @@ describe('integration testing', () => {
     await prisma.session.deleteMany({});
   });
 
-  afterEach(async () => {
-    await prisma.session.deleteMany({});
-  });
-
   it('should not initialize a user session when the session is not modified', async () => {
     await request(app)
       .get('/')

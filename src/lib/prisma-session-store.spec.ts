@@ -165,22 +165,22 @@ describe('PrismaSessionStore', () => {
 
   it('should enable automatic prune for expired entries', async () => {
     const [store, { findManyMock, deleteMock }] = await freshStore({
-      checkPeriod: 100,
+      checkPeriod: 10,
     });
     findManyMock.mockResolvedValue([{ expires: createExpiration(-1) }]);
 
-    await sleep(100);
+    await sleep(10);
     expect(deleteMock).toHaveBeenCalled();
 
     store.stopInterval();
   });
 
   it('automatic check for expired entries should be disabled', async () => {
-    const [store, { findManyMock, deleteMock }] = await freshStore();
+    const [_store, { findManyMock, deleteMock }] = await freshStore();
 
     findManyMock.mockResolvedValue([{ expires: createExpiration(-1) }]);
 
-    await sleep(100);
+    await sleep(10);
     expect(deleteMock).not.toHaveBeenCalled();
   });
 
