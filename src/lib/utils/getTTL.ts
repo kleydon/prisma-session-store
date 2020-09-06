@@ -1,5 +1,5 @@
-import { IOptions } from '../../@types';
-import { PartialDeep } from 'type-fest';
+import type { IOptions } from '../../@types';
+import type { PartialDeep } from 'type-fest';
 import { ONE_DAY } from './constants';
 
 /**

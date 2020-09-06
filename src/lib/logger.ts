@@ -1,4 +1,4 @@
-import { ILevel, ILogger } from '../@types/logger';
+import type { ILevel, ILogger } from '../@types/logger';
 
 /**
  * A object that handles logging to a given logger based on the logging level
