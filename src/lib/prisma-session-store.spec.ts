@@ -110,7 +110,7 @@ describe('PrismaSessionStore', () => {
 
     await store.get('sid-0', (err, val) => {
       expect(err).toBeUndefined();
-      expect(val.sample).toBe(true);
+      expect(val?.sample).toBe(true);
     });
   });
 
@@ -227,9 +227,7 @@ describe('PrismaSessionStore', () => {
       expect(err).toBeUndefined();
 
       expect(typeof all).toBe('object');
-      Object.keys(all).forEach((sid) => {
-        expect(all[sid].i).toBe(sid);
-      });
+      if (all) Object.keys(all).forEach((sid) => expect(all[sid].i).toBe(sid));
     });
   });
 

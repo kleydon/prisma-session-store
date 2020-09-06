@@ -2,7 +2,13 @@ import type { PartialDeep } from 'type-fest';
 import cuid from 'cuid';
 import { dedent } from 'ts-dedent';
 
-import type { IOptions, IPrisma, IPrismaSession, ISession } from '../@types';
+import type {
+  IOptions,
+  IPrisma,
+  IPrismaSession,
+  ISession,
+  ISessions,
+} from '../@types';
 import { getTTL, defer, createExpiration } from './utils';
 import { ManagedLogger } from './logger';
 
@@ -94,7 +100,7 @@ export default (session: ISession) => {
      */
     public get = async (
       sid: string,
-      callback: (err?: unknown, val?: any) => void
+      callback: <T>(err?: unknown, val?: Express.SessionData) => void
     ) => {
       const session: IPrismaSession | null = await this.prisma.session
         .findOne({
@@ -105,7 +111,9 @@ export default (session: ISession) => {
       if (!session) return callback();
 
       try {
-        const result = this.serializer.parse(session.data ?? '{}');
+        const result = this.serializer.parse(
+          session.data ?? '{}'
+        ) as Express.SessionData;
         if (callback) defer(callback, undefined, result);
       } catch (e: unknown) {
         this.logger.error(`get(): ${e}`);
@@ -240,15 +248,26 @@ export default (session: ISession) => {
      * @param callback a callback providing all session data
      * or an error that occurred
      */
-    public all = async (callback?: (err?: unknown, all?: any) => void) => {
+    public all = async (
+      callback?: (err?: unknown, all?: ISessions) => void
+    ) => {
       try {
         const sessions = await this.prisma.session.findMany({
           select: { sid: true, data: true },
         });
 
         const result = sessions
-          .map(({ sid, data }) => [sid, this.serializer.parse(data ?? '{}')])
-          .reduce((prev, [sid, data]) => ({ ...prev, [sid]: data }), {});
+          .map(
+            ({ sid, data }) =>
+              [
+                sid,
+                this.serializer.parse(data ?? '{}') as Express.SessionData,
+              ] as const
+          )
+          .reduce(
+            (prev, [sid, data]) => ({ ...prev, [sid]: data }),
+            {} as ISessions
+          );
 
         if (callback) defer(callback, undefined, result);
       } catch (e: unknown) {
@@ -325,14 +344,14 @@ export default (session: ISession) => {
      */
     public destroy = async (
       sid: string | string[],
-      callback?: (err?: any) => void
+      callback?: (err?: unknown) => void
     ) => {
       if (Array.isArray(sid)) {
         await Promise.all(sid.map(async (s) => this.destroy(s, callback)));
       } else {
         try {
           await this.prisma.session.delete({ where: { sid } });
-        } catch (e) {
+        } catch (e: unknown) {
           this.logger.warn(
             `Attempt to destroy non-existent session:${sid} ${e}`
           );
