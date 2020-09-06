@@ -31,16 +31,7 @@ export default (session: ISession) => {
     ) {
       super(prisma);
       this.startInterval();
-      this.prisma.$connect?.();
-
-      (
-        this.prisma?.session?.findMany({ select: { sid: true } }) ??
-        new Promise((_resolve, reject) => reject())
-      ).catch(() =>
-        this.logger.error(dedent`Could not connect to Sessions model in Prisma.
-        Please make sure that prisma is setup correctly and that your migrations are current.
-        For more information check out https://github.com/kleydon/prisma-session-store`)
-      );
+      this.connect();
     }
 
     /**
@@ -83,6 +74,22 @@ export default (session: ISession) => {
       this.options.logger ?? console,
       this.options.loggerLevel ?? ['error']
     );
+
+    /**
+     * Attempts to connect to Prisma, displaying a pretty error if the connection is not possible.
+     */
+    private async connect(): Promise<void> {
+      await this.prisma.$connect?.();
+
+      await (
+        this.prisma?.session?.findMany({ select: { sid: true } }) ??
+        new Promise((_resolve, reject) => reject())
+      ).catch(() =>
+        this.logger.error(dedent`Could not connect to Sessions model in Prisma.
+        Please make sure that prisma is setup correctly and that your migrations are current.
+        For more information check out https://github.com/kleydon/prisma-session-store`)
+      );
+    }
 
     /**
      * Attempt to fetch session by the given `sid`.
