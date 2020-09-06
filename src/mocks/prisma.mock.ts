@@ -1,4 +1,7 @@
 export const createPrismaMock = () => {
+  const connectMock = jest.fn();
+  const disconnectMock = jest.fn();
+
   const createMock = jest.fn();
   const deleteMock = jest.fn();
   const deleteManyMock = jest.fn();
@@ -7,8 +10,8 @@ export const createPrismaMock = () => {
   const updateMock = jest.fn();
 
   const prisma = {
-    $connect: jest.fn(),
-    $disconnect: jest.fn(),
+    $connect: connectMock,
+    $disconnect: disconnectMock,
     session: {
       create: createMock,
       delete: deleteMock,
@@ -19,9 +22,19 @@ export const createPrismaMock = () => {
     },
   };
 
+  connectMock.mockResolvedValue(undefined);
+  disconnectMock.mockResolvedValue(undefined);
+  findOneMock.mockResolvedValue(null);
+  findManyMock.mockResolvedValue([]);
+  deleteManyMock.mockResolvedValue([]);
+
+  deleteMock.mockRejectedValue('Could not find ID');
+
   return [
     prisma,
     {
+      connectMock,
+      disconnectMock,
       createMock,
       deleteMock,
       deleteManyMock,

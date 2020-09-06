@@ -1,7 +1,5 @@
 /**
- * Creates an array starting from a certain value and ending just before another value
- * @param end the value to end just before reaching
- * @param start the value to start at. Defaults to 0
+ * Creates an array starting at 0 going to `length` -1
+ * @param length the value to end just before reaching
  */
-export const range = (end: number, start: number = 0) =>
-  Array.from({ length: end - start }, (_, i) => i + start);
+export const range = (length: number) => Array.from({ length }, (_, i) => i);

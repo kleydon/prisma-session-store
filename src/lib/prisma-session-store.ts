@@ -39,7 +39,13 @@ export default (session: ISession) => {
      * @description The currently active interval created with `startInterval()` and removed with `stopInterval()`
      * @type {NodeJS.Timeout}
      */
-    private _checkInterval?: NodeJS.Timeout;
+    private checkInterval?: NodeJS.Timeout;
+
+    /**
+     * @private
+     * @description whether or not the prisma connection has been tested to be invalid
+     */
+    private invalidConnection = false;
 
     /**
      * @private
@@ -79,16 +85,25 @@ export default (session: ISession) => {
      * Attempts to connect to Prisma, displaying a pretty error if the connection is not possible.
      */
     private async connect(): Promise<void> {
-      await this.prisma.$connect?.();
+      await this.prisma?.$connect?.();
+      await this.validateConnection();
+    }
 
+    /**
+     * Returns if the connect is valid or not, logging an error if it is not.
+     */
+    private async validateConnection(): Promise<boolean> {
       await (
-        this.prisma?.session?.findMany({ select: { sid: true } }) ??
-        new Promise((_resolve, reject) => reject())
-      ).catch(() =>
+        this.prisma?.$connect?.() ?? new Promise((_resolve, reject) => reject())
+      ).catch(() => {
+        this.invalidConnection = true;
+        this.stopInterval();
         this.logger.error(dedent`Could not connect to Sessions model in Prisma.
         Please make sure that prisma is setup correctly and that your migrations are current.
-        For more information check out https://github.com/kleydon/prisma-session-store`)
-      );
+        For more information check out https://github.com/kleydon/prisma-session-store`);
+      });
+
+      return !this.invalidConnection;
     }
 
     /**
@@ -99,21 +114,24 @@ export default (session: ISession) => {
      */
     public readonly get = async (
       sid: string,
-      callback: <T>(err?: unknown, val?: Express.SessionData) => void
+      callback?: <T>(err?: unknown, val?: Express.SessionData) => void
     ) => {
+      if (!(await this.validateConnection())) return callback?.();
+
       const session: IPrismaSession | null = await this.prisma.session
         .findOne({
           where: { sid },
         })
         .catch(() => null);
 
-      if (!session) return callback();
+      if (!session) return callback?.();
 
       try {
         const result = this.serializer.parse(
           session.data ?? '{}'
         ) as Express.SessionData;
         if (callback) defer(callback, undefined, result);
+        return result;
       } catch (e: unknown) {
         this.logger.error(`get(): ${e}`);
         if (callback) defer(callback, e);
@@ -131,8 +149,10 @@ export default (session: ISession) => {
     public readonly set = async (
       sid: string,
       session: PartialDeep<Express.SessionData>,
-      callback?: (err: unknown) => void
+      callback?: (err?: unknown) => void
     ) => {
+      if (!(await this.validateConnection())) return callback?.();
+
       const ttl = getTTL(this.options, session, sid);
       const expires = createExpiration(ttl);
 
@@ -142,6 +162,7 @@ export default (session: ISession) => {
       } catch (e: unknown) {
         this.logger.error(`set(): ${e}`);
         if (callback) defer(callback, e);
+        return;
       }
 
       const existingSession: IPrismaSession | null = await this.prisma.session
@@ -166,7 +187,7 @@ export default (session: ISession) => {
           where: { sid },
           data,
         });
-      } else if (sessionString) {
+      } else {
         await this.prisma.session.create({
           data: { ...data, data: sessionString },
         });
@@ -188,6 +209,8 @@ export default (session: ISession) => {
       session: PartialDeep<Express.SessionData>,
       callback?: (err?: unknown) => void
     ) => {
+      if (!(await this.validateConnection())) return callback?.();
+
       const ttl = getTTL(this.options, session, sid);
       const expires = createExpiration(ttl);
 
@@ -229,6 +252,8 @@ export default (session: ISession) => {
     public readonly ids = async (
       callback?: (err?: unknown, ids?: number[]) => void
     ) => {
+      if (!(await this.validateConnection())) return callback?.();
+
       //XXX More efficient way? XXX
 
       try {
@@ -238,6 +263,7 @@ export default (session: ISession) => {
 
         const sids = sessions.map(({ sid }) => sid);
         if (callback) defer(callback, undefined, sids);
+        return sids;
       } catch (e: unknown) {
         if (callback) defer(callback, e);
       }
@@ -252,6 +278,8 @@ export default (session: ISession) => {
     public readonly all = async (
       callback?: (err?: unknown, all?: ISessions) => void
     ) => {
+      if (!(await this.validateConnection())) return callback?.();
+
       try {
         const sessions = await this.prisma.session.findMany({
           select: { sid: true, data: true },
@@ -271,6 +299,7 @@ export default (session: ISession) => {
           );
 
         if (callback) defer(callback, undefined, result);
+        return result;
       } catch (e: unknown) {
         this.logger.error(`all(): ${e}`);
         if (callback) defer(callback, e);
@@ -284,6 +313,8 @@ export default (session: ISession) => {
      * were deleted or that an error occurred
      */
     public readonly clear = async (callback?: (err?: unknown) => void) => {
+      if (!(await this.validateConnection())) return callback?.();
+
       try {
         await this.prisma.session.deleteMany();
 
@@ -301,6 +332,8 @@ export default (session: ISession) => {
     public readonly length = async (
       callback?: (err?: unknown, length?: number) => void
     ) => {
+      if (!(await this.validateConnection())) return callback?.();
+
       // XXX More efficient way? XXX
 
       try {
@@ -310,6 +343,7 @@ export default (session: ISession) => {
 
         const itemCount = sessions.length;
         if (callback) defer(callback, undefined, itemCount);
+        return itemCount;
       } catch (e: unknown) {
         if (callback) defer(callback, e);
       }
@@ -326,6 +360,8 @@ export default (session: ISession) => {
       sid: string | string[],
       callback?: (err?: unknown) => void
     ) => {
+      if (!(await this.validateConnection())) return callback?.();
+
       if (Array.isArray(sid)) {
         await Promise.all(sid.map(async (s) => this.destroy(s, callback)));
       } else {
@@ -346,6 +382,8 @@ export default (session: ISession) => {
      * Remove only expired entries from the store
      */
     public readonly prune = async () => {
+      if (!(await this.validateConnection())) return;
+
       // XXX More efficient way? Maybe when filtering is fully implemented? XXX
 
       this.logger.log('Checking for any expired sessions...');
@@ -378,7 +416,7 @@ export default (session: ISession) => {
 
       if (ms && typeof ms === 'number') {
         this.stopInterval();
-        this._checkInterval = setInterval(() => {
+        this.checkInterval = setInterval(() => {
           this.prune();
         }, Math.floor(ms));
       }
@@ -388,7 +426,7 @@ export default (session: ISession) => {
      * Stop checking if sessions have expired
      */
     public stopInterval(): void {
-      if (this._checkInterval) clearInterval(this._checkInterval);
+      if (this.checkInterval) clearInterval(this.checkInterval);
     }
 
     /**

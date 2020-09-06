@@ -66,4 +66,5 @@ dist
 .build-cache
 
 # Testing
+coverage
 prisma/dev.db

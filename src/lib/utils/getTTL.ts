@@ -19,6 +19,6 @@ export const getTTL = (
   if (options.ttl)
     throw new TypeError('`options.ttl` must be a number or function.');
 
-  const maxAge = session?.cookie?.maxAge ?? null;
+  const maxAge = session.cookie?.maxAge ?? null;
   return typeof maxAge === 'number' ? Math.floor(maxAge) : ONE_DAY;
 };
