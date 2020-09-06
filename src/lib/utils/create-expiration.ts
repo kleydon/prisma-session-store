@@ -3,5 +3,5 @@
  * @param milliseconds the number of milliseconds before the expiration date
  */
 export const createExpiration = (milliseconds: number) => {
-  return new Date(new Date().valueOf() + milliseconds);
+  return new Date(Math.floor(new Date().valueOf() / 10) * 10 + milliseconds);
 };
