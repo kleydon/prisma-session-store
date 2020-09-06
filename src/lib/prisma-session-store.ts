@@ -85,20 +85,12 @@ export default (session: ISession) => {
     );
 
     /**
-     * A function to stop any ongoing intervals and disconnect from the `PrismaClient`
-     */
-    public async shutdown() {
-      this.stopInterval();
-      await this.prisma.$disconnect();
-    }
-
-    /**
      * Attempt to fetch session by the given `sid`.
      *
      * @param sid the sid to attempt to fetch
      * @param callback a function to call with the results
      */
-    public get = async (
+    public readonly get = async (
       sid: string,
       callback: <T>(err?: unknown, val?: Express.SessionData) => void
     ) => {
@@ -129,7 +121,7 @@ export default (session: ISession) => {
      * @param callback a callback with the results of saving the data
      * or an error that occurred
      */
-    public set = async (
+    public readonly set = async (
       sid: string,
       session: PartialDeep<Express.SessionData>,
       callback?: (err: unknown) => void
@@ -184,7 +176,7 @@ export default (session: ISession) => {
      * @param callback a callback notifying that the refresh was completed
      * or that an error occurred
      */
-    public touch = async (
+    public readonly touch = async (
       sid: string,
       session: PartialDeep<Express.SessionData>,
       callback?: (err?: unknown) => void
@@ -227,7 +219,9 @@ export default (session: ISession) => {
      * @param callback a callback providing all session id
      * or an error that occurred
      */
-    public ids = async (callback?: (err?: unknown, ids?: number[]) => void) => {
+    public readonly ids = async (
+      callback?: (err?: unknown, ids?: number[]) => void
+    ) => {
       //XXX More efficient way? XXX
 
       try {
@@ -248,7 +242,7 @@ export default (session: ISession) => {
      * @param callback a callback providing all session data
      * or an error that occurred
      */
-    public all = async (
+    public readonly all = async (
       callback?: (err?: unknown, all?: ISessions) => void
     ) => {
       try {
@@ -282,7 +276,7 @@ export default (session: ISession) => {
      * @param callback a callback notifying that all sessions
      * were deleted or that an error occurred
      */
-    public clear = async (callback?: (err?: unknown) => void) => {
+    public readonly clear = async (callback?: (err?: unknown) => void) => {
       try {
         await this.prisma.session.deleteMany();
 
@@ -297,7 +291,7 @@ export default (session: ISession) => {
      *
      * @param callback
      */
-    public length = async (
+    public readonly length = async (
       callback?: (err?: unknown, length?: number) => void
     ) => {
       // XXX More efficient way? XXX
@@ -315,34 +309,13 @@ export default (session: ISession) => {
     };
 
     /**
-     * Start an interval to prune expired sessions
-     */
-    public startInterval() {
-      const ms = this.options.checkPeriod;
-
-      if (ms && typeof ms === 'number') {
-        this.stopInterval();
-        this._checkInterval = setInterval(() => {
-          this.prune();
-        }, Math.floor(ms));
-      }
-    }
-
-    /**
-     * Stop checking if sessions have expired
-     */
-    public stopInterval() {
-      if (this._checkInterval) clearInterval(this._checkInterval);
-    }
-
-    /**
      * Destroy the session associated with the given `sid`(s).
      *
      * @param sid a single or multiple id(s) to remove data for
      * @param callback a callback notifying that the session(s) have
      * been destroyed or that an error occurred
      */
-    public destroy = async (
+    public readonly destroy = async (
       sid: string | string[],
       callback?: (err?: unknown) => void
     ) => {
@@ -365,7 +338,7 @@ export default (session: ISession) => {
     /**
      * Remove only expired entries from the store
      */
-    public prune = async () => {
+    public readonly prune = async () => {
       // XXX More efficient way? Maybe when filtering is fully implemented? XXX
 
       this.logger.log('Checking for any expired sessions...');
@@ -389,5 +362,34 @@ export default (session: ISession) => {
         }
       }
     };
+
+    /**
+     * Start an interval to prune expired sessions
+     */
+    public startInterval(): void {
+      const ms = this.options.checkPeriod;
+
+      if (ms && typeof ms === 'number') {
+        this.stopInterval();
+        this._checkInterval = setInterval(() => {
+          this.prune();
+        }, Math.floor(ms));
+      }
+    }
+
+    /**
+     * Stop checking if sessions have expired
+     */
+    public stopInterval(): void {
+      if (this._checkInterval) clearInterval(this._checkInterval);
+    }
+
+    /**
+     * A function to stop any ongoing intervals and disconnect from the `PrismaClient`
+     */
+    public async shutdown(): Promise<void> {
+      this.stopInterval();
+      await this.prisma.$disconnect();
+    }
   };
 };
