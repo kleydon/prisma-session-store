@@ -99,9 +99,9 @@ model Session {
 }
 ```
 
-#### Types
+#### GraphQL Nexus
 
-If you are not using TypeScript you may need to define your types like so:
+If you are using [@nexus/schema](https://www.npmjs.com/package/@nexus/schema) you can define your schema like so:
 
 ```js
 ...
