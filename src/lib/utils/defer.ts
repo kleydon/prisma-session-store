@@ -4,7 +4,7 @@
  * @param callback the function to run in the future
  * @param args the arguments for the `callback` function when it is run
  */
-export const defer = <T extends Function, A extends any[]>(
+export const defer = <T extends Function, A extends unknown[]>(
   callback: T,
   ...args: A
 ) => {

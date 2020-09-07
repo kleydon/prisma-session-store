@@ -1,10 +1,14 @@
+// tslint:disable: import-name
+// tslint:disable: no-default-import
+// tslint:disable: no-duplicate-string
+
 import { PrismaClient } from '@prisma/client';
+import { execSync } from 'child_process';
 import express from 'express';
 import session from 'express-session';
-import request from 'supertest';
-import { execSync } from 'child_process';
 import { existsSync } from 'fs';
 import { join } from 'path';
+import request from 'supertest';
 
 import prismaSessionStore from '../src';
 
@@ -15,9 +19,8 @@ describe('integration testing', () => {
   const prisma = new PrismaClient();
 
   beforeAll(() => {
-    if (!existsSync(join(__dirname, '../prisma/dev.db'))) {
+    if (!existsSync(join(__dirname, '../prisma/dev.db')))
       execSync('prisma migrate up --experimental --create-db');
-    }
 
     app.use(
       session({
@@ -45,11 +48,13 @@ describe('integration testing', () => {
     });
 
     app.delete('/', (req, res) => {
-      if (req.session)
+      if (req.session) {
         req.session.destroy(() => {
           res.json(req.session?.data);
         });
-      else res.status(500).json({ error: 'Could not delete session' });
+      } else {
+        res.status(500).json({ error: 'Could not delete session' });
+      }
     });
   });
 

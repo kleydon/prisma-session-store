@@ -1,14 +1,19 @@
-import type { IOptions, IPrisma } from '../@types';
+// tslint:disable: no-default-import
+// tslint:disable: no-duplicate-string
+
+import { PrismaClient } from '@prisma/client';
+
+import type { IOptions } from '../@types';
 import { createPrismaMock, MockStore } from '../mocks';
+
+import prismaSessionStore from './prisma-session-store';
 import { createExpiration, range, sleep } from './utils/testing';
 
-import prismSessionStore from './prisma-session-store';
-
 jest.mock('./utils/defer', () => ({
-  defer: (fn: Function, ...args: any[]) => fn(...args),
+  defer: (fn: Function, ...args: unknown[]) => fn(...args),
 }));
 
-const PrismaSessionStore = prismSessionStore({ Store: MockStore });
+const PrismaSessionStore = prismaSessionStore({ Store: MockStore });
 
 /**
  * Creates a new `PrismaSessionStore` and prisma mock
@@ -79,17 +84,6 @@ describe('PrismaSessionStore', () => {
   });
 
   describe('.get()', () => {
-    it('should fail gracefully when attempting to get a non-existent entry', async () => {
-      const [store, { findOneMock }] = freshStore();
-      const callback = jest.fn();
-
-      findOneMock.mockResolvedValueOnce(null);
-
-      await store.get('sid-0', callback);
-
-      expect(callback).toHaveBeenCalledWith();
-    });
-
     it('should get a sample entry', async () => {
       const [store, { findOneMock }] = freshStore();
       const callback = jest.fn();
@@ -505,7 +499,7 @@ describe('PrismaSessionStore', () => {
     it('should disconnect', async () => {
       const [store, { disconnectMock }] = freshStore();
 
-      store.shutdown();
+      await store.shutdown();
 
       expect(disconnectMock).toHaveBeenCalled();
     });
@@ -514,12 +508,18 @@ describe('PrismaSessionStore', () => {
   describe('options', () => {
     describe('prisma', () => {
       it('should fail gracefully with invalid prisma objects', async () => {
-        const invalidPrisma = new PrismaSessionStore(undefined as any, {
-          logger: false,
-        });
-        const invalidPrismaKeys = new PrismaSessionStore({} as any, {
-          logger: false,
-        });
+        const invalidPrisma = new PrismaSessionStore(
+          (undefined as unknown) as PrismaClient,
+          {
+            logger: false,
+          }
+        );
+        const invalidPrismaKeys = new PrismaSessionStore(
+          ({} as unknown) as PrismaClient,
+          {
+            logger: false,
+          }
+        );
 
         const callback = jest.fn();
 
@@ -730,7 +730,7 @@ describe('PrismaSessionStore', () => {
       });
 
       it('automatic check for expired entries should be disabled', async () => {
-        const [_store, { findManyMock, deleteMock }] = freshStore({
+        const [, { findManyMock, deleteMock }] = freshStore({
           checkPeriod: undefined,
         });
 
@@ -767,7 +767,7 @@ describe('PrismaSessionStore', () => {
       });
 
       it('should throw if ttl is not a function or number', async () => {
-        const [store] = freshStore({ ttl: '12' as any });
+        const [store] = freshStore({ ttl: ('12' as unknown) as number });
 
         await expect(store.set('sid-0', {})).rejects.toBeTruthy();
       });

@@ -1,24 +1,21 @@
-import type { PartialDeep } from 'type-fest';
+// tslint:disable: no-default-export
+
 import cuid from 'cuid';
 import { dedent } from 'ts-dedent';
+import type { PartialDeep } from 'type-fest';
 
-import type {
-  IOptions,
-  IPrisma,
-  IPrismaSession,
-  ISession,
-  ISessions,
-} from '../@types';
-import { getTTL, defer, createExpiration } from './utils';
+import type { IOptions, IPrisma, ISession, ISessions } from '../@types';
+
 import { ManagedLogger } from './logger';
+import { createExpiration, defer, getTTL } from './utils';
 
 /**
  * Returns a `PrismaSessionStore` extending the `session` Store class.
  *
  * @param session the `express-session` object which will be used to extend a store from
  */
-export default (session: ISession) => {
-  return class PrismaSessionStore extends session.Store {
+export default (expressSession: ISession) =>
+  class extends expressSession.Store {
     /**
      * Initialize PrismaSessionStore with the given `prisma` and (optional) `options`.
      *
@@ -35,239 +32,44 @@ export default (session: ISession) => {
     }
 
     /**
-     * @private
      * @description The currently active interval created with `startInterval()` and removed with `stopInterval()`
-     * @type {NodeJS.Timeout}
      */
     private checkInterval?: NodeJS.Timeout;
 
     /**
-     * @private
-     * @description whether or not the prisma connection has been tested to be invalid
-     */
-    private invalidConnection = false;
-
-    /**
-     * @private
      * @description A function to generate the Prisma Record ID for a given session ID
      *
      * Note: If undefined and dbRecordIdIsSessionId is also undefined then a random
      * CUID will be used instead.
      */
-    private dbRecordIdFunction = this.options.dbRecordIdFunction;
+    private readonly dbRecordIdFunction = this.options.dbRecordIdFunction;
 
     /**
-     * @private
-     * @description Some serializer that will transform objects into strings
-     * and vice versa
-     */
-    private serializer = this.options.serializer ?? JSON;
-
-    /**
-     * @private
      * @description A flag indicating to use the session ID as the Prisma Record ID
      *
      * Note: If undefined and dbRecordIdFunction is also undefined then a random
      * CUID will be used instead.
      */
-    private dbRecordIdIsSessionId = this.options.dbRecordIdIsSessionId;
+    private readonly dbRecordIdIsSessionId = this.options.dbRecordIdIsSessionId;
 
     /**
-     * @private
+     * @description whether or not the prisma connection has been tested to be invalid
+     */
+    private invalidConnection = false;
+
+    /**
      * @description A object that handles logging to a given logger based on the logging level
      */
-    private logger = new ManagedLogger(
+    private readonly logger = new ManagedLogger(
       this.options.logger ?? console,
       this.options.loggerLevel ?? ['error']
     );
 
     /**
-     * Attempts to connect to Prisma, displaying a pretty error if the connection is not possible.
+     * @description Some serializer that will transform objects into strings
+     * and vice versa
      */
-    private async connect(): Promise<void> {
-      await this.prisma?.$connect?.();
-      await this.validateConnection();
-    }
-
-    /**
-     * Returns if the connect is valid or not, logging an error if it is not.
-     */
-    private async validateConnection(): Promise<boolean> {
-      await (
-        this.prisma?.$connect?.() ?? new Promise((_resolve, reject) => reject())
-      ).catch(() => {
-        this.invalidConnection = true;
-        this.stopInterval();
-        this.logger.error(dedent`Could not connect to Sessions model in Prisma.
-        Please make sure that prisma is setup correctly and that your migrations are current.
-        For more information check out https://github.com/kleydon/prisma-session-store`);
-      });
-
-      return !this.invalidConnection;
-    }
-
-    /**
-     * Attempt to fetch session by the given `sid`.
-     *
-     * @param sid the sid to attempt to fetch
-     * @param callback a function to call with the results
-     */
-    public readonly get = async (
-      sid: string,
-      callback?: <T>(err?: unknown, val?: Express.SessionData) => void
-    ) => {
-      if (!(await this.validateConnection())) return callback?.();
-
-      const session: IPrismaSession | null = await this.prisma.session
-        .findOne({
-          where: { sid },
-        })
-        .catch(() => null);
-
-      if (!session) return callback?.();
-
-      try {
-        const result = this.serializer.parse(
-          session.data ?? '{}'
-        ) as Express.SessionData;
-        if (callback) defer(callback, undefined, result);
-        return result;
-      } catch (e: unknown) {
-        this.logger.error(`get(): ${e}`);
-        if (callback) defer(callback, e);
-      }
-    };
-
-    /**
-     * Commit the given `session` object associated with the given `sid`.
-     *
-     * @param sid the ID to save the session data under
-     * @param session the session data to save
-     * @param callback a callback with the results of saving the data
-     * or an error that occurred
-     */
-    public readonly set = async (
-      sid: string,
-      session: PartialDeep<Express.SessionData>,
-      callback?: (err?: unknown) => void
-    ) => {
-      if (!(await this.validateConnection())) return callback?.();
-
-      const ttl = getTTL(this.options, session, sid);
-      const expires = createExpiration(ttl);
-
-      let sessionString = undefined;
-      try {
-        sessionString = this.serializer.stringify(session);
-      } catch (e: unknown) {
-        this.logger.error(`set(): ${e}`);
-        if (callback) defer(callback, e);
-        return;
-      }
-
-      const existingSession: IPrismaSession | null = await this.prisma.session
-        .findOne({
-          where: { sid },
-        })
-        .catch(() => null);
-
-      const data = {
-        id: this.dbRecordIdIsSessionId
-          ? sid
-          : this.dbRecordIdFunction
-          ? this.dbRecordIdFunction(sid)
-          : cuid(),
-        sid,
-        data: sessionString,
-        expires,
-      };
-
-      if (existingSession) {
-        await this.prisma.session.update({
-          where: { sid },
-          data,
-        });
-      } else {
-        await this.prisma.session.create({
-          data: { ...data, data: sessionString },
-        });
-      }
-
-      if (callback) defer(callback);
-    };
-
-    /**
-     * Refresh the time-to-live for the session with the given `sid`.
-     *
-     * @param sid the id of the session to refresh
-     * @param session the data of the session to resave
-     * @param callback a callback notifying that the refresh was completed
-     * or that an error occurred
-     */
-    public readonly touch = async (
-      sid: string,
-      session: PartialDeep<Express.SessionData>,
-      callback?: (err?: unknown) => void
-    ) => {
-      if (!(await this.validateConnection())) return callback?.();
-
-      const ttl = getTTL(this.options, session, sid);
-      const expires = createExpiration(ttl);
-
-      try {
-        const existingSession = await this.prisma.session.findOne({
-          where: { sid },
-        });
-
-        if (existingSession) {
-          const existingSessionData = {
-            ...this.serializer.parse(existingSession.data ?? '{}'),
-            cookie: session.cookie,
-          };
-
-          await this.prisma.session.update({
-            where: { sid: existingSession.sid },
-            data: {
-              sid,
-              data: this.serializer.stringify(existingSessionData),
-              expires,
-            },
-          });
-        }
-
-        // *** If there is no found session, for some reason, should it be recreated from sess *** ?
-        if (callback) defer(callback);
-      } catch (e: unknown) {
-        this.logger.error(`touch(): ${e}`);
-        if (callback) defer(callback, e);
-      }
-    };
-
-    /**
-     * Fetch all sessions' ids
-     *
-     * @param callback a callback providing all session id
-     * or an error that occurred
-     */
-    public readonly ids = async (
-      callback?: (err?: unknown, ids?: number[]) => void
-    ) => {
-      if (!(await this.validateConnection())) return callback?.();
-
-      //XXX More efficient way? XXX
-
-      try {
-        const sessions = await this.prisma.session.findMany({
-          select: { sid: true },
-        });
-
-        const sids = sessions.map(({ sid }) => sid);
-        if (callback) defer(callback, undefined, sids);
-        return sids;
-      } catch (e: unknown) {
-        if (callback) defer(callback, e);
-      }
-    };
+    private readonly serializer = this.options.serializer ?? JSON;
 
     /**
      * Fetch all sessions
@@ -293,15 +95,16 @@ export default (session: ISession) => {
                 this.serializer.parse(data ?? '{}') as Express.SessionData,
               ] as const
           )
-          .reduce(
+          .reduce<ISessions>(
             (prev, [sid, data]) => ({ ...prev, [sid]: data }),
-            {} as ISessions
+            {}
           );
 
         if (callback) defer(callback, undefined, result);
+
         return result;
       } catch (e: unknown) {
-        this.logger.error(`all(): ${e}`);
+        this.logger.error(`all(): ${String(e)}`);
         if (callback) defer(callback, e);
       }
     };
@@ -325,31 +128,6 @@ export default (session: ISession) => {
     };
 
     /**
-     * Get the count of all sessions in the store
-     *
-     * @param callback
-     */
-    public readonly length = async (
-      callback?: (err?: unknown, length?: number) => void
-    ) => {
-      if (!(await this.validateConnection())) return callback?.();
-
-      // XXX More efficient way? XXX
-
-      try {
-        const sessions = await this.prisma.session.findMany({
-          select: { sid: true }, //Limit what gets sent back; can't be empty.
-        });
-
-        const itemCount = sessions.length;
-        if (callback) defer(callback, undefined, itemCount);
-        return itemCount;
-      } catch (e: unknown) {
-        if (callback) defer(callback, e);
-      }
-    };
-
-    /**
      * Destroy the session associated with the given `sid`(s).
      *
      * @param sid a single or multiple id(s) to remove data for
@@ -362,20 +140,107 @@ export default (session: ISession) => {
     ) => {
       if (!(await this.validateConnection())) return callback?.();
 
-      if (Array.isArray(sid)) {
-        await Promise.all(sid.map(async (s) => this.destroy(s, callback)));
-      } else {
-        try {
+      try {
+        if (Array.isArray(sid)) {
+          await Promise.all(sid.map(async (id) => this.destroy(id, callback)));
+        } else {
           await this.prisma.session.delete({ where: { sid } });
-        } catch (e: unknown) {
-          this.logger.warn(
-            `Attempt to destroy non-existent session:${sid} ${e}`
-          );
-          if (callback) defer(callback, e);
         }
+      } catch (e: unknown) {
+        this.logger.warn(
+          `Attempt to destroy non-existent session:${String(sid)} ${String(e)}`
+        );
+        if (callback) defer(callback, e);
       }
 
       if (callback) defer(callback);
+    };
+
+    /**
+     * Attempt to fetch session by the given `sid`.
+     *
+     * @param sid the sid to attempt to fetch
+     * @param callback a function to call with the results
+     */
+    public readonly get = async (
+      sid: string,
+      callback?: (err?: unknown, val?: Express.SessionData) => void
+    ) => {
+      if (!(await this.validateConnection())) return callback?.();
+
+      const session = await this.prisma.session
+        .findOne({
+          where: { sid },
+        })
+        .catch(() => null);
+
+      if (session === null) return callback?.();
+
+      try {
+        const result = this.serializer.parse(
+          session.data ?? '{}'
+        ) as Express.SessionData;
+        if (callback) defer(callback, undefined, result);
+
+        return result;
+      } catch (e: unknown) {
+        this.logger.error(`get(): ${String(e)}`);
+        if (callback) defer(callback, e);
+      }
+    };
+
+    /**
+     * Fetch all sessions' ids
+     *
+     * @param callback a callback providing all session id
+     * or an error that occurred
+     */
+    public readonly ids = async (
+      callback?: (err?: unknown, ids?: number[]) => void
+    ) => {
+      if (!(await this.validateConnection())) return callback?.();
+
+      // XXX More efficient way? XXX
+
+      try {
+        const sessions = await this.prisma.session.findMany({
+          select: { sid: true },
+        });
+
+        const sids = sessions.map(({ sid }) => sid);
+        if (callback) defer(callback, undefined, sids);
+
+        return sids;
+      } catch (e: unknown) {
+        if (callback) defer(callback, e);
+      }
+    };
+
+    /**
+     * Get the count of all sessions in the store
+     *
+     * @param callback a callback providing either the number of sessions
+     * or an error that occurred
+     */
+    public readonly length = async (
+      callback?: (err?: unknown, length?: number) => void
+    ) => {
+      if (!(await this.validateConnection())) return callback?.();
+
+      // XXX More efficient way? XXX
+
+      try {
+        const sessions = await this.prisma.session.findMany({
+          select: { sid: true }, // Limit what gets sent back; can't be empty.
+        });
+
+        const itemCount = sessions.length;
+        if (callback) defer(callback, undefined, itemCount);
+
+        return itemCount;
+      } catch (e: unknown) {
+        if (callback) defer(callback, e);
+      }
     };
 
     /**
@@ -409,12 +274,79 @@ export default (session: ISession) => {
     };
 
     /**
+     * Commit the given `session` object associated with the given `sid`.
+     *
+     * @param sid the ID to save the session data under
+     * @param session the session data to save
+     * @param callback a callback with the results of saving the data
+     * or an error that occurred
+     */
+    public readonly set = async (
+      sid: string,
+      session: PartialDeep<Express.SessionData>,
+      callback?: (err?: unknown) => void
+    ) => {
+      if (!(await this.validateConnection())) return callback?.();
+
+      const ttl = getTTL(this.options, session, sid);
+      const expires = createExpiration(ttl);
+
+      let sessionString;
+      try {
+        sessionString = this.serializer.stringify(session);
+      } catch (e: unknown) {
+        this.logger.error(`set(): ${String(e)}`);
+        if (callback) defer(callback, e);
+
+        return;
+      }
+
+      const existingSession = await this.prisma.session
+        .findOne({
+          where: { sid },
+        })
+        .catch(() => null);
+
+      const data = {
+        sid,
+        expires,
+        data: sessionString,
+        id: this.dbRecordIdIsSessionId
+          ? sid
+          : this.dbRecordIdFunction
+          ? this.dbRecordIdFunction(sid)
+          : cuid(),
+      };
+
+      if (existingSession !== null) {
+        await this.prisma.session.update({
+          data,
+          where: { sid },
+        });
+      } else {
+        await this.prisma.session.create({
+          data: { ...data, data: sessionString },
+        });
+      }
+
+      if (callback) defer(callback);
+    };
+
+    /**
+     * A function to stop any ongoing intervals and disconnect from the `PrismaClient`
+     */
+    public async shutdown(): Promise<void> {
+      this.stopInterval();
+      await this.prisma.$disconnect();
+    }
+
+    /**
      * Start an interval to prune expired sessions
      */
     public startInterval(): void {
-      const ms = this.options.checkPeriod;
+      const ms: unknown = this.options.checkPeriod;
 
-      if (ms && typeof ms === 'number') {
+      if (typeof ms === 'number' && ms !== 0) {
         this.stopInterval();
         this.checkInterval = setInterval(() => {
           this.prune();
@@ -430,11 +362,74 @@ export default (session: ISession) => {
     }
 
     /**
-     * A function to stop any ongoing intervals and disconnect from the `PrismaClient`
+     * Refresh the time-to-live for the session with the given `sid`.
+     *
+     * @param sid the id of the session to refresh
+     * @param session the data of the session to resave
+     * @param callback a callback notifying that the refresh was completed
+     * or that an error occurred
      */
-    public async shutdown(): Promise<void> {
-      this.stopInterval();
-      await this.prisma.$disconnect();
+    public readonly touch = async (
+      sid: string,
+      session: PartialDeep<Express.SessionData>,
+      callback?: (err?: unknown) => void
+    ) => {
+      if (!(await this.validateConnection())) return callback?.();
+
+      const ttl = getTTL(this.options, session, sid);
+      const expires = createExpiration(ttl);
+
+      try {
+        const existingSession = await this.prisma.session.findOne({
+          where: { sid },
+        });
+
+        if (existingSession !== null) {
+          const existingSessionData = {
+            ...this.serializer.parse(existingSession.data ?? '{}'),
+            cookie: session.cookie,
+          };
+
+          await this.prisma.session.update({
+            where: { sid: existingSession.sid },
+            data: {
+              sid,
+              expires,
+              data: this.serializer.stringify(existingSessionData),
+            },
+          });
+        }
+
+        // *** If there is no found session, for some reason, should it be recreated from sess *** ?
+        if (callback) defer(callback);
+      } catch (e: unknown) {
+        this.logger.error(`touch(): ${String(e)}`);
+        if (callback) defer(callback, e);
+      }
+    };
+
+    /**
+     * Attempts to connect to Prisma, displaying a pretty error if the connection is not possible.
+     */
+    private async connect(): Promise<void> {
+      await this.prisma?.$connect?.();
+      await this.validateConnection();
+    }
+
+    /**
+     * Returns if the connect is valid or not, logging an error if it is not.
+     */
+    private async validateConnection(): Promise<boolean> {
+      await (
+        this.prisma?.$connect?.() ?? new Promise((_resolve, reject) => reject())
+      ).catch(() => {
+        this.invalidConnection = true;
+        this.stopInterval();
+        this.logger.error(dedent`Could not connect to Sessions model in Prisma.
+        Please make sure that prisma is setup correctly and that your migrations are current.
+        For more information check out https://github.com/kleydon/prisma-session-store`);
+      });
+
+      return !this.invalidConnection;
     }
   };
-};

@@ -1,5 +1,7 @@
-import type { IOptions } from '../../@types';
 import type { PartialDeep } from 'type-fest';
+
+import type { IOptions } from '../../@types';
+
 import { ONE_DAY } from './constants';
 
 /**
@@ -16,9 +18,10 @@ export const getTTL = (
   if (typeof options.ttl === 'number') return options.ttl;
   if (typeof options.ttl === 'function')
     return options.ttl(options, session, sid);
-  if (options.ttl)
+  if ((options.ttl as unknown) !== undefined)
     throw new TypeError('`options.ttl` must be a number or function.');
 
   const maxAge = session.cookie?.maxAge ?? null;
+
   return typeof maxAge === 'number' ? Math.floor(maxAge) : ONE_DAY;
 };
