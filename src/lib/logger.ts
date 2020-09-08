@@ -1,7 +1,7 @@
 import type { ILevel, ILogger } from '../@types/logger';
 
 /**
- * A object that handles logging to a given logger based on the logging level
+ * An object that handles logging to a given logger based on the logging level
  */
 export class ManagedLogger {
   /**
