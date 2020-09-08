@@ -101,7 +101,7 @@ model Session {
 
 #### GraphQL Nexus
 
-If you are using [@nexus/schema](https://www.npmjs.com/package/@nexus/schema) you can define your schema like so:
+If you are using [@nexus/schema](https://www.npmjs.com/package/@nexus/schema) you can define your Session type:
 
 ```js
 ...

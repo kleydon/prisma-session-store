@@ -7,7 +7,9 @@
     "Session",
     "Memory",
     "Store",
-    "TypeScript"
+    "TypeScript",
+    "PASETO",
+    "JWT"
   ],
   "version": "0.3.0",
   "license": "MIT",
