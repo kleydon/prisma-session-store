@@ -2,7 +2,7 @@ import type { PartialDeep } from 'type-fest';
 
 import type { IOptions } from '../../@types';
 
-import { ONE_DAY } from './constants';
+import { ONE_DAY_MS } from './constants';
 
 /**
  *  Determines the TTL (Time to Live) for a given session with given options
@@ -23,5 +23,5 @@ export const getTTL = (
 
   const maxAge = session.cookie?.maxAge ?? null;
 
-  return typeof maxAge === 'number' ? Math.floor(maxAge) : ONE_DAY;
+  return typeof maxAge === 'number' ? Math.floor(maxAge) : ONE_DAY_MS;
 };
