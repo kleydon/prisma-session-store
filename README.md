@@ -99,6 +99,8 @@ model Session {
 }
 ```
 
+Don't forget to run `prisma generate` to generate your PrismaClient.
+
 #### GraphQL Nexus
 
 If you are using [@nexus/schema](https://www.npmjs.com/package/@nexus/schema) you can define your Session type:
@@ -118,6 +120,11 @@ If you are using [@nexus/schema](https://www.npmjs.com/package/@nexus/schema) yo
 ...
 
 ```
+
+#### Database
+
+If you are using Prisma's migrations you can simply run `prisma migrate save` and `prisma migrate up` to migrate your database.
+If you are using something other then `prisma` then you will need to manage the migrations yourself and you check the [Prisma Documentation](https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch-sql-typescript-postgres#create-database-tables-with-sql) on the subject if you need help.
 
 ## Options
 
@@ -139,6 +146,8 @@ CUID will be used instead.
 - `noDisposeOnSet` By default, if you set a `dispose()` method, then it'll be called whenever a `set()` operation overwrites an existing key. If you set this option, `dispose()` will only be called when a key falls out of the cache, not when it is overwritten.
 
 - `serializer` An object containing `stringify` and `parse` methods compatible with Javascript's `JSON` to override the serializer used.
+
+Two new options were added apart from the work that was already done by [memorystore](https://github.com/roccomuso/memorystore), they both relate to logging and allow you to inject your own logger object giving you flexibility to log outputs to something like NestJS or where ever you would like even saving them to disk if that's what you want.
 
 - `logger` Where logs should be outputted to, by default `console`. If set to `false` then logging will be disabled
 
