@@ -47,8 +47,8 @@ export interface IPrisma {
   session: {
     create(args: ICreateArgs): Promise<IPrismaSession>;
     delete(args: IDeleteArgs): Promise<IPrismaSession>;
-    deleteMany(args: unknown): Promise<unknown>;
-    findMany(args: IFindManyArgs): Promise<IPrismaSession[]>;
+    deleteMany(args?: unknown): Promise<unknown>;
+    findMany(args?: IFindManyArgs): Promise<IPrismaSession[]>;
     findOne(args: IFindOneArgs): Promise<IPrismaSession | null>;
     update(args: IUpdateArgs): Promise<IPrismaSession>;
   };
