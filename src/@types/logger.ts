@@ -4,19 +4,19 @@
  */
 export interface ILogger {
   /**
+   * A function that logs error messages
+   */
+  error?(error?: unknown): void;
+
+  /**
    * A function that logs general information
    */
-  log?: (message?: string) => void;
+  log?(message?: string): void;
 
   /**
    * A function that logs warnings
    */
-  warn?: (message?: string) => void;
-
-  /**
-   * A function that logs error messages
-   */
-  error?: (error?: unknown) => void;
+  warn?(message?: string): void;
 }
 
 /**

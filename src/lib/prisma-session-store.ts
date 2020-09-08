@@ -37,14 +37,6 @@ export default (expressSession: ISession) =>
     private checkInterval?: NodeJS.Timeout;
 
     /**
-     * @description A function to generate the Prisma Record ID for a given session ID
-     *
-     * Note: If undefined and dbRecordIdIsSessionId is also undefined then a random
-     * CUID will be used instead.
-     */
-    private readonly dbRecordIdFunction = this.options.dbRecordIdFunction;
-
-    /**
      * @description A flag indicating to use the session ID as the Prisma Record ID
      *
      * Note: If undefined and dbRecordIdFunction is also undefined then a random
@@ -311,11 +303,7 @@ export default (expressSession: ISession) =>
         sid,
         expires,
         data: sessionString,
-        id: this.dbRecordIdIsSessionId
-          ? sid
-          : this.dbRecordIdFunction
-          ? this.dbRecordIdFunction(sid)
-          : cuid(),
+        id: this.dbRecordIdIsSessionId ? sid : this.dbRecordIdFunction(sid),
       };
 
       if (existingSession !== null) {
@@ -417,13 +405,30 @@ export default (expressSession: ISession) =>
     }
 
     /**
+     * @description A function to generate the Prisma Record ID for a given session ID
+     *
+     * Note: If undefined and dbRecordIdIsSessionId is also undefined then a random
+     * CUID will be used instead.
+     */
+    private readonly dbRecordIdFunction = (sid: string) =>
+      this.options.dbRecordIdFunction?.(sid) ?? cuid();
+
+    /**
+     * Disables store, used when prisma cannot be connected to
+     */
+    private disable(): void {
+      this.invalidConnection = true;
+    }
+
+    /**
      * Returns if the connect is valid or not, logging an error if it is not.
      */
     private async validateConnection(): Promise<boolean> {
       await (
-        this.prisma?.$connect?.() ?? new Promise((_resolve, reject) => reject())
+        this.prisma?.$connect?.() ??
+        Promise.reject(new Error('Could not connect'))
       ).catch(() => {
-        this.invalidConnection = true;
+        this.disable();
         this.stopInterval();
         this.logger.error(dedent`Could not connect to Sessions model in Prisma.
         Please make sure that prisma is setup correctly and that your migrations are current.

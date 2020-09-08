@@ -3662,9 +3662,9 @@ rxjs-report-usage@^1.0.4:
     prompts "~2.3.2"
 
 rxjs-tslint-rules@latest:
-  version "4.34.1"
-  resolved "https://registry.yarnpkg.com/rxjs-tslint-rules/-/rxjs-tslint-rules-4.34.1.tgz#55c661bfcca00ef41be093e404e95c9ad4a50fef"
-  integrity sha512-Vyx7jhvXFHUWTmgTbyTr9RuMbvmNQbzihG+1wRG9tN4KPZy3vcEzz7O8CtXOvskejbOMFBNi+h4YfgPeEI0+HQ==
+  version "4.34.3"
+  resolved "https://registry.yarnpkg.com/rxjs-tslint-rules/-/rxjs-tslint-rules-4.34.3.tgz#122a2cc2e112ea7cd96b6bbbfc228868941df6bb"
+  integrity sha512-5bv7wS+YbhAclcaRPDTbMhL668FpWB5C44mY+/2dOYPCXWpxkqmg9PdM7Hwe7+yoR2UmwuElQ0qf1pCR2ANxuA==
   dependencies:
     "@phenomnomnominal/tsquery" "^4.0.0"
     decamelize "^4.0.0"
@@ -4221,20 +4221,31 @@ tslint-clean-code@latest:
     memoize-decorator "^1.0.2"
     tsutils "2.7.1"
 
-tslint-config-suiyobi@^0.2.7:
-  version "0.2.7"
-  resolved "https://registry.yarnpkg.com/tslint-config-suiyobi/-/tslint-config-suiyobi-0.2.7.tgz#fd7e43d3196fa04c80995581900ce80b4f8534f7"
-  integrity sha512-7UqZbhdvxq7LjibCN+j7N+js3YkBDfgq/zvGElxiMcQPkxSRmL+aCFdjf8sZZxcw2lnbspRfInKfeAfFgI7x/w==
+tslint-config-suiyobi@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/tslint-config-suiyobi/-/tslint-config-suiyobi-0.3.1.tgz#c952f251c780cf352ec1200de19ff37f90d13418"
+  integrity sha512-J7z9WZzPXLSICXjj/IwQfdRbWwlISa0zt2e8RccZ+wRlJA74dfB4u5LQZKfVPTEEJWE1UMDZo1mFMdGFsGUluQ==
   dependencies:
     "@angular-devkit/schematics" "^10.1.0"
     doctrine "^3.0.0"
     immutable "^4.0.0-rc.12"
     rxjs-tslint-rules latest
     tslint-clean-code latest
+    tslint-etc latest
     tslint-plugin-prettier latest
     tsutils "^3.17.1"
     tsutils-etc "^1.3.1"
     typescript-tslint-plugin latest
+
+tslint-etc@latest:
+  version "1.13.7"
+  resolved "https://registry.yarnpkg.com/tslint-etc/-/tslint-etc-1.13.7.tgz#3fc6dacc21b3ffa2e727398b7a8d7099dbb95942"
+  integrity sha512-v66dIwtWwc1epHH/KjrUnl97oMRwuoSOYdh0YNHGKwZvtxJzM1Afb23ugfrj028+DZoR1vCxb4/YV7eXgTn2nw==
+  dependencies:
+    "@phenomnomnominal/tsquery" "^4.0.0"
+    tslib "^2.0.0"
+    tsutils "^3.0.0"
+    tsutils-etc "^1.0.0"
 
 tslint-plugin-prettier@latest:
   version "2.3.0"
@@ -4264,7 +4275,7 @@ tslint@^6.1.3:
     tslib "^1.13.0"
     tsutils "^2.29.0"
 
-tsutils-etc@^1.2.2, tsutils-etc@^1.3.1:
+tsutils-etc@^1.0.0, tsutils-etc@^1.2.2, tsutils-etc@^1.3.1:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/tsutils-etc/-/tsutils-etc-1.3.1.tgz#40a70d06978969b648f973ab727e99e01c7b3d45"
   integrity sha512-r1HDN1ldbiHHTgt+TfzQK+wyAoIsdpwYf21OZf0tquMN0ANXQsegyxArwDThALGzVqipJahAFq7cOJCgEoPX1g==
@@ -4546,9 +4557,9 @@ whatwg-mimetype@^2.3.0:
   integrity sha512-M4yMwr6mAnQz76TbJm914+gPpB/nCwvZbJU28cUD6dR004SAxDLOOSUaB1JDRqLtaOV/vi0IC5lEAGFgrjGv/g==
 
 whatwg-url@^8.0.0:
-  version "8.2.1"
-  resolved "https://registry.yarnpkg.com/whatwg-url/-/whatwg-url-8.2.1.tgz#ed73417230784b281fb2a32c3c501738b46167c3"
-  integrity sha512-ZmVCr6nfBeaMxEHALLEGy0LszYjpJqf6PVNQUQ1qd9Et+q7Jpygd4rGGDXgHjD8e99yLFseD69msHDM4YwPZ4A==
+  version "8.2.2"
+  resolved "https://registry.yarnpkg.com/whatwg-url/-/whatwg-url-8.2.2.tgz#85e7f9795108b53d554cec640b2e8aee2a0d4bfd"
+  integrity sha512-PcVnO6NiewhkmzV0qn7A+UZ9Xx4maNTI+O+TShmfE4pqjoCMwUMjkvoNhNHPTvgR7QH9Xt3R13iHuWy2sToFxQ==
   dependencies:
     lodash.sortby "^4.7.0"
     tr46 "^2.0.2"

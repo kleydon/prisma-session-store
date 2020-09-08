@@ -1,8 +1,8 @@
 export interface IPrismaSession {
-  id: string;
-  sid: string;
   data: string | null;
   expires: Date;
+  id: string;
+  sid: string;
 }
 
 interface ICreatePrismaSession extends IPrismaSession {
@@ -10,23 +10,23 @@ interface ICreatePrismaSession extends IPrismaSession {
 }
 
 interface IFindOneArgs {
-  where: {
-    sid: string;
-  };
   select?: {
     expires?: boolean;
     sid?: boolean;
+  };
+  where: {
+    sid: string;
   };
 }
 
 interface IFindManyArgs {
-  where?: {
-    sid?: string;
-  };
   select?: {
+    data?: boolean;
     expires?: boolean;
     sid?: boolean;
-    data?: boolean;
+  };
+  where?: {
+    sid?: string;
   };
 }
 
@@ -35,8 +35,8 @@ interface ICreateArgs {
 }
 
 interface IUpdateArgs {
-  where: { sid: string };
   data: Partial<ICreatePrismaSession>;
+  where: { sid: string };
 }
 
 interface IDeleteArgs {
@@ -44,14 +44,14 @@ interface IDeleteArgs {
 }
 
 export interface IPrisma {
-  $connect(): Promise<void>;
-  $disconnect(): Promise<void>;
   session: {
-    findOne(args: IFindOneArgs): Promise<IPrismaSession | null>;
-    findMany(args?: IFindManyArgs): Promise<IPrismaSession[]>;
-    delete(args?: IDeleteArgs): Promise<IPrismaSession>;
-    deleteMany(args?: any): Promise<any>;
     create(args: ICreateArgs): Promise<IPrismaSession>;
+    delete(args?: IDeleteArgs): Promise<IPrismaSession>;
+    deleteMany(args?: unknown): Promise<unknown>;
+    findMany(args?: IFindManyArgs): Promise<IPrismaSession[]>;
+    findOne(args: IFindOneArgs): Promise<IPrismaSession | null>;
     update(args: IUpdateArgs): Promise<IPrismaSession>;
   };
+  $connect(): Promise<void>;
+  $disconnect(): Promise<void>;
 }
