@@ -4,7 +4,7 @@
  * created at roughly the same time match. This is required in order to test these
  * values.
  *
- * @param milliseconds the number of milliseconds before the expiration date
+ * @param shelfLifeMs the number of milliseconds before the expiration date
  */
 export const createExpiration = (shelfLifeMs: number) =>
   new Date(Math.floor(new Date().valueOf() / 10) * 10 + shelfLifeMs);
