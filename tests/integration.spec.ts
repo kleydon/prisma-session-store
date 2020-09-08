@@ -1,5 +1,3 @@
-// tslint:disable: import-name
-// tslint:disable: no-default-import
 // tslint:disable: no-duplicate-string
 
 import { PrismaClient } from '@prisma/client';
@@ -10,9 +8,7 @@ import { existsSync } from 'fs';
 import { join } from 'path';
 import request from 'supertest';
 
-import prismaSessionStore from '../src';
-
-const PrismaSessionStore = prismaSessionStore(session);
+import { PrismaSessionStore } from '../src';
 
 describe('integration testing', () => {
   const app = express();
