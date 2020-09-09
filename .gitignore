@@ -61,3 +61,10 @@ build/Release
 .pnp.*
 # ---------------------------------------
 
+# TypeScript compiled files
+dist
+.build-cache
+
+# Testing
+coverage
+prisma/dev.db

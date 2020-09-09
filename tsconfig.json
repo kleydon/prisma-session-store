@@ -1,0 +1,23 @@
+{
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ],
+  "compilerOptions": {
+    "strict": true,
+    "target": "es5",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "declaration": true,
+    "forceConsistentCasingInFileNames": true,
+    "composite": true,
+    "incremental": true
+  },
+  "exclude": ["node_modules"],
+  "include": [],
+  "files": []
+}
