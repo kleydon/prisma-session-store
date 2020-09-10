@@ -126,8 +126,8 @@ If you are using something other then `prisma` then you will need to manage the 
 
 ## Migrating from versions prior to `1.0.0`
 
-In `1.0.0` the public API of this library was reworked. Previously a default export that was a
-factory to build the `PrismaSessionStore` class was used. In `1.0.0` a named export of the class
+In `1.0.0` the public API of this library was reworked. Previously the default export that was a
+factory to build the `PrismaSessionStore` class. In `1.0.0` a named export of the class
 `PrismaSessionStore` was put in place of the default export. So after updating you will need to
 change your import and remove your call to the factory.
 
