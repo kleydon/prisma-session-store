@@ -9,7 +9,7 @@ import { ManagedLogger } from './logger';
 import { createExpiration, defer, getTTL } from './utils';
 
 /**
- * A `express-session` store used in the `express-session` options
+ * An `express-session` store used in the `express-session` options
  * to hook up prisma as a session store
  *
  * @example
@@ -22,7 +22,9 @@ import { createExpiration, defer, getTTL } from './utils';
  *     secret: "Some Secret Value",
  *     resave: false,
  *     saveUninitialized: false,
- *     store: new PrismaSessionStore(prisma);
+ *     store: new PrismaSessionStore(prisma, {
+ *       checkPeriod: 10 * 60 * 1000 // 10 minutes
+ *     });
  *   })
  * );
  * ```
@@ -44,7 +46,9 @@ export class PrismaSessionStore extends Store {
    *     secret: "Some Secret Value",
    *     resave: false,
    *     saveUninitialized: false,
-   *     store: new PrismaSessionStore(prisma);
+   *     store: new PrismaSessionStore(prisma, {
+   *       checkPeriod: 10 * 60 * 1000 // 10 minutes
+   *     });
    *   })
    * );
    * ```
@@ -147,7 +151,7 @@ export class PrismaSessionStore extends Store {
   };
 
   /**
-   * Destroy the session associated with the given `sid`(s).
+   * Destroy the session(s) associated with the given `sid`(s).
    *
    * @param sid a single or multiple id(s) to remove data for
    * @param callback a callback notifying that the session(s) have
@@ -408,7 +412,6 @@ export class PrismaSessionStore extends Store {
         await this.prisma.session.update({
           where: { sid: existingSession.sid },
           data: {
-            sid,
             expires,
             data: this.serializer.stringify(existingSessionData),
           },
