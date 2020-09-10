@@ -12,7 +12,7 @@ jest.mock('./utils/defer', () => ({
 
 /**
  * Creates a new `PrismaSessionStore` and prisma mock
- * @param options any additional options for the store
+ * @param options any specific options related to what you are testing
  */
 const freshStore = (options: IOptions = {}) => {
   const [prisma, mocks] = createPrismaMock();
