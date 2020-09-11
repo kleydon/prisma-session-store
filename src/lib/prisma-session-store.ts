@@ -281,7 +281,9 @@ export default (expressSession: ISession) =>
       if (!(await this.validateConnection())) return callback?.();
 
       const ttl = getTTL(this.options, session, sid);
-      const expires = createExpiration(ttl);
+      const expires = createExpiration(ttl, {
+        rounding: this.options.roundTTL,
+      });
 
       let sessionString;
       try {
@@ -365,7 +367,9 @@ export default (expressSession: ISession) =>
       if (!(await this.validateConnection())) return callback?.();
 
       const ttl = getTTL(this.options, session, sid);
-      const expires = createExpiration(ttl);
+      const expires = createExpiration(ttl, {
+        rounding: this.options.roundTTL,
+      });
 
       try {
         const existingSession = await this.prisma.session.findOne({

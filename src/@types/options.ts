@@ -61,6 +61,12 @@ export interface IOptions {
   noDisposeOnSet?: boolean;
 
   /**
+   * The number of milliseconds to round the expiration date.
+   * Mostly used for testing.
+   */
+  roundTTL?: number;
+
+  /**
    * An object containing `stringify` and `parse` methods compatible with
    * Javascript `JSON` to override the serializer used.
    */
@@ -75,6 +81,7 @@ export interface IOptions {
    * try to get a stale entry, as if it had already been deleted.
    */
   stale?: boolean;
+
   /**
    * "Time to live", in ms;
    * defines session expiration time. Defaults to session.maxAge (if set), or
