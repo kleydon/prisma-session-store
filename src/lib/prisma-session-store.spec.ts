@@ -1,23 +1,18 @@
-// tslint:disable: no-default-import
 // tslint:disable: no-duplicate-string
 
-import { PrismaClient } from '@prisma/client';
+import type { IOptions, IPrisma } from '../@types';
+import { createPrismaMock } from '../mocks';
 
-import type { IOptions } from '../@types';
-import { createPrismaMock, MockStore } from '../mocks';
-
-import prismaSessionStore from './prisma-session-store';
+import { PrismaSessionStore } from './prisma-session-store';
 import { createExpiration, range, sleep } from './utils/testing';
 
 jest.mock('./utils/defer', () => ({
   defer: (fn: Function, ...args: unknown[]) => fn(...args),
 }));
 
-const PrismaSessionStore = prismaSessionStore({ Store: MockStore });
-
 /**
  * Creates a new `PrismaSessionStore` and prisma mock
- * @param options any additional options for the store
+ * @param options any specific options related to what you are testing
  */
 const freshStore = (options: IOptions = {}) => {
   const [prisma, mocks] = createPrismaMock();
@@ -509,13 +504,13 @@ describe('PrismaSessionStore', () => {
     describe('prisma', () => {
       it('should fail gracefully with invalid prisma objects', async () => {
         const invalidPrisma = new PrismaSessionStore(
-          (undefined as unknown) as PrismaClient,
+          (undefined as unknown) as IPrisma,
           {
             logger: false,
           }
         );
         const invalidPrismaKeys = new PrismaSessionStore(
-          ({} as unknown) as PrismaClient,
+          ({} as unknown) as IPrisma,
           {
             logger: false,
           }

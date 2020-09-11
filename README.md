@@ -14,8 +14,8 @@ Based on: [memorystore](https://github.com/roccomuso/memorystore), by [roccomuso
 
 ```js
 
-const expressSession = require('express-session')
-const PrismaSessionStore = require('@quixo3/prisma-session-store')(expressSession)
+const expressSession = require('express-session');
+const { PrismaSessionStore } = require('@quixo3/prisma-session-store');
 
 ...
 
@@ -34,7 +34,7 @@ app.use(
       }
     )
   })
-)
+);
 
 ...
 
@@ -44,9 +44,7 @@ app.use(
 
 ```ts
 import expressSession from 'express-session';
-import prismaSessionStore from '@quixo3/prisma-session-store';
-
-const PrismaSessionStore = prismaSessionStore(expressSession);
+import { PrismaSessionStore } from '@quixo3/prisma-session-store';
 
 ...
 
@@ -65,7 +63,7 @@ app.use(
       }
     )
   })
-)
+);
 
 ...
 ```
@@ -125,6 +123,45 @@ If you are using [@nexus/schema](https://www.npmjs.com/package/@nexus/schema) yo
 
 If you are using Prisma's migrations you can simply run `prisma migrate save` and `prisma migrate up` to migrate your database.
 If you are using something other then `prisma` then you will need to manage the migrations yourself and you check the [Prisma Documentation](https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch-sql-typescript-postgres#create-database-tables-with-sql) on the subject if you need help.
+
+## Migrating from versions prior to `1.0.0`
+
+In `1.0.0` the public API of this library was reworked. Previously the default export that was a
+factory to build the `PrismaSessionStore` class. In `1.0.0` a named export of the class
+`PrismaSessionStore` was put in place of the default export. So after updating you will need to
+change your import and remove your call to the factory.
+
+### JavaScript
+
+Before
+
+```js
+const PrismaSessionStore = require('@quixo3/prisma-session-store')(
+  expressSession
+);
+```
+
+After
+
+```js
+const { PrismaSessionStore } = require('@quixo3/prisma-session-store');
+```
+
+### TypeScript
+
+Before
+
+```ts
+import prismaSessionStore from '@quixo3/prisma-session-store';
+
+const PrismaSessionStore = prismaSessionStore(expressSession);
+```
+
+After
+
+```ts
+import { PrismaSessionStore } from '@quixo3/prisma-session-store';
+```
 
 ## Options
 
