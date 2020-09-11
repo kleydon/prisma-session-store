@@ -50,6 +50,8 @@
     "express-session": "*"
   },
   "devDependencies": {
+    "@commitlint/cli": "^9.1.2",
+    "@commitlint/config-conventional": "^9.1.2",
     "@prisma/cli": "^2.6.2",
     "@prisma/client": "^2.6.2",
     "@types/express": "^4.17.8",
@@ -59,6 +61,7 @@
     "@types/supertest": "^2.0.10",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
+    "husky": "^4.3.0",
     "jest": "^26.4.2",
     "prettier": "^2.1.1",
     "supertest": "^4.0.2",
