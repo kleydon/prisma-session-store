@@ -1,0 +1,6 @@
+{
+  "recommendations": [
+    "vivaxy.vscode-conventional-commits",
+    "ms-vscode.vscode-typescript-tslint-plugin"
+  ]
+}
