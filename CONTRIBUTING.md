@@ -45,7 +45,7 @@ Each commit message consists of a **header**, a **body**, and a **footer**.
 
 The `header` is mandatory and must conform to the [Commit Message Header](#commit-header) format.
 
-The `body` is mandatory for all commits except for those of scope "docs".
+The `body` is mandatory for all commits.
 When the body is required it must be at least 20 characters long.
 
 The `footer` is optional.
@@ -64,14 +64,14 @@ Any line of the commit message cannot be longer than 100 characters.
   └─⫸ Commit Type: build|ci|docs|feat|fix|perf|refactor|style|test
 ```
 
-The `<type>` and `<summary>` fields are mandatory, the `(<scope>)` field is optional.
+The `<type>` and `<summary>` fields are mandatory.
 
 #### Type
 
 Must be one of the following:
 
-- **build**: Changes that affect the build system or external dependencies (example scopes: gulp, broccoli, npm)
-- **ci**: Changes to our CI configuration files and scripts (example scopes: Circle, BrowserStack, SauceLabs)
+- **build**: Changes that affect the build system or external dependencies
+- **ci**: Changes to our CI configuration files and scripts
 - **docs**: Documentation only changes
 - **feat**: A new feature
 - **fix**: A bug fix
