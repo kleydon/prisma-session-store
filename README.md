@@ -184,11 +184,14 @@ CUID will be used instead.
 
 - `serializer` An object containing `stringify` and `parse` methods compatible with Javascript's `JSON` to override the serializer used.
 
-Two new options were added apart from the work that was already done by [memorystore](https://github.com/roccomuso/memorystore), they both relate to logging and allow you to inject your own logger object giving you flexibility to log outputs to something like NestJS or where ever you would like even saving them to disk if that's what you want.
+Three new options were added apart from the work that was already done by [memorystore](https://github.com/roccomuso/memorystore), two of them relate to logging and allow you to inject your own logger object giving you flexibility to log outputs to something like NestJS or whenever you would like, even saving them to disk if that's what you want. And the third is used for testing to round the TTL so that it can be compared do another generated ttl during the assertion.
 
 - `logger` Where logs should be outputted to, by default `console`. If set to `false` then logging will be disabled
 
 - `loggerLevel` Determines which logging methods to enable, by default `error` only
+
+- `roundTTL` the amount of milliseconds to round down the TTL so that it will match another TTL generated later.
+  Mostly used for test stability.
 
 ## Methods
 

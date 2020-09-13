@@ -347,11 +347,13 @@ describe('PrismaSessionStore', () => {
 
   describe('.prune()', () => {
     it('should prune old sessions', async () => {
-      const [store, { findManyMock, deleteMock }] = freshStore();
+      const [store, { findManyMock, deleteMock }] = freshStore({
+        roundTTL: 100,
+      });
 
       findManyMock.mockResolvedValueOnce([
-        { sid: 'sid-0', expires: createExpiration(-1) },
-        { sid: 'sid-1', expires: createExpiration(500) },
+        { sid: 'sid-0', expires: createExpiration(-1, { rounding: 100 }) },
+        { sid: 'sid-1', expires: createExpiration(500, { rounding: 100 }) },
       ]);
       deleteMock.mockResolvedValue(undefined);
 
@@ -714,9 +716,12 @@ describe('PrismaSessionStore', () => {
       it('should enable automatic prune for expired entries', async () => {
         const [store, { findManyMock, deleteMock }] = freshStore({
           checkPeriod: 10,
+          roundTTL: 100,
         });
         deleteMock.mockResolvedValue(undefined);
-        findManyMock.mockResolvedValue([{ expires: createExpiration(-1) }]);
+        findManyMock.mockResolvedValue([
+          { expires: createExpiration(-1, { rounding: 100 }) },
+        ]);
 
         await sleep(10);
         expect(deleteMock).toHaveBeenCalled();
@@ -727,9 +732,12 @@ describe('PrismaSessionStore', () => {
       it('automatic check for expired entries should be disabled', async () => {
         const [, { findManyMock, deleteMock }] = freshStore({
           checkPeriod: undefined,
+          roundTTL: 100,
         });
 
-        findManyMock.mockResolvedValue([{ expires: createExpiration(-1) }]);
+        findManyMock.mockResolvedValue([
+          { expires: createExpiration(-1, { rounding: 100 }) },
+        ]);
 
         await sleep(10);
         expect(deleteMock).not.toHaveBeenCalled();
@@ -738,25 +746,28 @@ describe('PrismaSessionStore', () => {
 
     describe('ttl', () => {
       it('should use provided ttl time', async () => {
-        const [store, { createMock }] = freshStore({ ttl: 500 });
+        const [store, { createMock }] = freshStore({ ttl: 500, roundTTL: 100 });
 
         await store.set('sid-0', {});
 
         expect(createMock).toHaveBeenCalledWith({
           data: expect.objectContaining({
-            expires: createExpiration(500),
+            expires: createExpiration(500, { rounding: 100 }),
           }),
         });
       });
 
       it('should use provided ttl factory', async () => {
-        const [store, { createMock }] = freshStore({ ttl: () => 500 });
+        const [store, { createMock }] = freshStore({
+          ttl: () => 500,
+          roundTTL: 100,
+        });
 
         await store.set('sid-0', {});
 
         expect(createMock).toHaveBeenCalledWith({
           data: expect.objectContaining({
-            expires: createExpiration(500),
+            expires: createExpiration(500, { rounding: 100 }),
           }),
         });
       });
@@ -768,25 +779,28 @@ describe('PrismaSessionStore', () => {
       });
 
       it('should use cookie maxAge if ttl is undefined', async () => {
-        const [store, { createMock }] = freshStore({ ttl: undefined });
+        const [store, { createMock }] = freshStore({
+          ttl: undefined,
+          roundTTL: 100,
+        });
 
         await store.set('sid-0', { cookie: { maxAge: 100 } });
 
         expect(createMock).toHaveBeenCalledWith({
           data: expect.objectContaining({
-            expires: createExpiration(100),
+            expires: createExpiration(100, { rounding: 100 }),
           }),
         });
       });
 
       it('should override cookie maxAge', async () => {
-        const [store, { createMock }] = freshStore({ ttl: 500 });
+        const [store, { createMock }] = freshStore({ ttl: 500, roundTTL: 100 });
 
         await store.set('sid-0', { cookie: { maxAge: 100 } });
 
         expect(createMock).toHaveBeenCalledWith({
           data: expect.objectContaining({
-            expires: createExpiration(500),
+            expires: createExpiration(500, { rounding: 100 }),
           }),
         });
       });
