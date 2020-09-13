@@ -64,7 +64,7 @@ export interface IOptions {
    * The number of milliseconds to round the expiration date.
    * Mostly used for testing.
    */
-  roundTTL?: number;
+  roundTTL?: 10 | 100 | 1000;
 
   /**
    * An object containing `stringify` and `parse` methods compatible with
