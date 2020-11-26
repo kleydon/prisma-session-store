@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/kleydon/prisma-session-store/compare/v1.1.0...v1.1.1) (2020-11-26)
+
+
+### Bug Fixes
+
+* security update ([c950d45](https://github.com/kleydon/prisma-session-store/commit/c950d45e7c52761f6ce0300de6d2e7e7deae0b1d))
+
 # [1.1.0](https://github.com/kleydon/prisma-session-store/compare/v1.0.0...v1.1.0) (2020-09-13)
 
 
