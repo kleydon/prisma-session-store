@@ -127,10 +127,12 @@ If you are using something other then `prisma` then you will need to manage the 
 #### MySQL
 
 If you are using MySQL as your datasource provider you may also need change the type of your data column to be TEXT:
+
 ```sql
 USE your-database
 ALTER TABLE Session MODIFY data TEXT;
 ```
+
 Prisma `String` properties are mapped to `VARCHAR(191)` by default. Session data can be larger than 191 characters so updating the type to `TEXT` prevents errors when creating and updating sessions. If you know your session data will not exceed 191 characters you can skip this step or if you know your maximum size you can use `VARCHAR(YOUR_MAX_SIZE)`
 
 If you are using a version of Prisma that supports [migrating with native types](https://github.com/prisma/prisma/issues/4330) you can use a type annotation in your `schema.prisma` file instead of manually modifying your data column.
