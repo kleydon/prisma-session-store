@@ -80,9 +80,9 @@ describe('PrismaSessionStore', () => {
 
   describe('.get()', () => {
     it('should get a sample entry', async () => {
-      const [store, { findOneMock }] = freshStore();
+      const [store, { findUniqueMock }] = freshStore();
       const callback = jest.fn();
-      findOneMock.mockResolvedValue({ data: '{ "sample": true }' });
+      findUniqueMock.mockResolvedValue({ data: '{ "sample": true }' });
 
       await store.get('sid-0', callback);
 
@@ -90,10 +90,10 @@ describe('PrismaSessionStore', () => {
     });
 
     it('should not get empty entry', async () => {
-      const [store, { findOneMock }] = freshStore();
+      const [store, { findUniqueMock }] = freshStore();
       const callback = jest.fn();
 
-      findOneMock.mockRejectedValueOnce('sid must be defined');
+      findUniqueMock.mockRejectedValueOnce('sid must be defined');
 
       await store.get('', callback);
 
@@ -101,30 +101,30 @@ describe('PrismaSessionStore', () => {
     });
 
     it('should not get items that are not found', async () => {
-      const [store, { findOneMock }] = freshStore();
+      const [store, { findUniqueMock }] = freshStore();
       const callback = jest.fn();
 
-      findOneMock.mockResolvedValueOnce(null);
+      findUniqueMock.mockResolvedValueOnce(null);
       await store.get('sid-0', callback);
 
       expect(callback).toHaveBeenCalledWith();
     });
 
     it('should resolve to a promise', async () => {
-      const [store, { findOneMock }] = freshStore();
+      const [store, { findUniqueMock }] = freshStore();
 
-      findOneMock.mockResolvedValueOnce(null);
+      findUniqueMock.mockResolvedValueOnce(null);
       await expect(store.get('sid-0')).resolves.toBe(undefined);
 
-      findOneMock.mockResolvedValueOnce({ data: '{ "sample": true }' });
+      findUniqueMock.mockResolvedValueOnce({ data: '{ "sample": true }' });
       await expect(store.get('sid-0')).resolves.toStrictEqual({ sample: true });
     });
 
     it('should pass errors to the callback', async () => {
-      const [store, { findOneMock }] = freshStore();
+      const [store, { findUniqueMock }] = freshStore();
       const callback = jest.fn();
 
-      findOneMock.mockResolvedValueOnce({ data: '{ invalid json' });
+      findUniqueMock.mockResolvedValueOnce({ data: '{ invalid json' });
       await store.get('sid-0', callback);
 
       expect(callback).toHaveBeenCalledWith(
@@ -133,9 +133,9 @@ describe('PrismaSessionStore', () => {
     });
 
     it('should handle empty session data', async () => {
-      const [store, { findOneMock }] = freshStore();
+      const [store, { findUniqueMock }] = freshStore();
 
-      findOneMock.mockResolvedValueOnce({ data: null });
+      findUniqueMock.mockResolvedValueOnce({ data: null });
       await expect(store.get('sid-0')).resolves.toStrictEqual({});
     });
   });
@@ -182,9 +182,9 @@ describe('PrismaSessionStore', () => {
 
   describe('.touch()', () => {
     it('should update a given entry', async () => {
-      const [store, { updateMock, findOneMock }] = freshStore();
+      const [store, { updateMock, findUniqueMock }] = freshStore();
 
-      findOneMock.mockResolvedValue({ sid: 'sid-0', data: '{}' });
+      findUniqueMock.mockResolvedValue({ sid: 'sid-0', data: '{}' });
       await store.touch('sid-0', { cookie: { maxAge: 300 } });
       expect(updateMock).toHaveBeenCalledWith({
         data: expect.objectContaining({
@@ -197,10 +197,10 @@ describe('PrismaSessionStore', () => {
     });
 
     it('should fail gracefully when attempting to touch a non-existent entry', async () => {
-      const [store, { findOneMock }] = freshStore();
+      const [store, { findUniqueMock }] = freshStore();
       const callback = jest.fn();
 
-      findOneMock.mockResolvedValueOnce(null);
+      findUniqueMock.mockResolvedValueOnce(null);
 
       await store.touch('sid-0', { cookie: { maxAge: 300 } }, callback);
 
@@ -208,10 +208,10 @@ describe('PrismaSessionStore', () => {
     });
 
     it('should send errors to the callback', async () => {
-      const [store, { findOneMock }] = freshStore();
+      const [store, { findUniqueMock }] = freshStore();
       const callback = jest.fn();
 
-      findOneMock.mockRejectedValue('some error');
+      findUniqueMock.mockRejectedValue('some error');
 
       await store.touch('sid-0', { data: '' }, callback);
 
@@ -219,16 +219,16 @@ describe('PrismaSessionStore', () => {
     });
 
     it('should resolve despite errors occurring', async () => {
-      const [store, { findOneMock }] = freshStore();
+      const [store, { findUniqueMock }] = freshStore();
 
-      findOneMock.mockRejectedValue('some error');
+      findUniqueMock.mockRejectedValue('some error');
 
       await expect(store.touch('sid-0', { data: '' })).resolves.toBe(undefined);
     });
 
     it('should use an empty object if session data does not exist', async () => {
-      const [store, { findOneMock, updateMock }] = freshStore();
-      findOneMock.mockResolvedValue({ data: null });
+      const [store, { findUniqueMock, updateMock }] = freshStore();
+      findUniqueMock.mockResolvedValue({ data: null });
 
       await store.touch('sid-0', { cookie: { secure: false } });
 
@@ -257,9 +257,9 @@ describe('PrismaSessionStore', () => {
     });
 
     it('should update any existing sessions', async () => {
-      const [store, { updateMock, findOneMock }] = freshStore();
+      const [store, { updateMock, findUniqueMock }] = freshStore();
 
-      findOneMock.mockResolvedValue({
+      findUniqueMock.mockResolvedValue({
         sid: 'sid-0',
         data: '{"sample": false}',
       });
@@ -306,10 +306,10 @@ describe('PrismaSessionStore', () => {
     });
 
     it('should fail gracefully when it cannot fetch existing sessions', async () => {
-      const [store, { findOneMock }] = freshStore();
+      const [store, { findUniqueMock }] = freshStore();
       const callback = jest.fn();
 
-      findOneMock.mockRejectedValue('Could not connect to prisma');
+      findUniqueMock.mockRejectedValue('Could not connect to prisma');
 
       await store.set('sid-0', { data: '' }, callback);
 
@@ -569,11 +569,11 @@ describe('PrismaSessionStore', () => {
         const parse = jest.fn();
         const stringify = jest.fn();
 
-        const [store, { findOneMock }] = freshStore({
+        const [store, { findUniqueMock }] = freshStore({
           serializer: { parse, stringify },
         });
 
-        findOneMock.mockResolvedValue({ data: '{}' });
+        findUniqueMock.mockResolvedValue({ data: '{}' });
         await store.touch('sid-0', {});
 
         expect(parse).toHaveBeenCalled();
@@ -616,24 +616,24 @@ describe('PrismaSessionStore', () => {
         const warn = jest.fn();
         const error = jest.fn();
 
-        const [logOnly, { findOneMock: logFindOne }] = freshStore({
+        const [logOnly, { findUniqueMock: logFindUnique }] = freshStore({
           logger: { log },
           loggerLevel: ['error', 'log', 'warn'],
         });
 
-        const [warnOnly, { findOneMock: warnFindOne }] = freshStore({
+        const [warnOnly, { findUniqueMock: warnFindUnique }] = freshStore({
           logger: { warn },
           loggerLevel: ['error', 'log', 'warn'],
         });
 
-        const [errorOnly, { findOneMock: errorFindOne }] = freshStore({
+        const [errorOnly, { findUniqueMock: errorFindUnique }] = freshStore({
           logger: { error },
           loggerLevel: ['error', 'log', 'warn'],
         });
 
-        logFindOne.mockResolvedValue({ data: 'invalid-json' });
-        warnFindOne.mockResolvedValue({ data: 'invalid-json' });
-        errorFindOne.mockResolvedValue({ data: 'invalid-json' });
+        logFindUnique.mockResolvedValue({ data: 'invalid-json' });
+        warnFindUnique.mockResolvedValue({ data: 'invalid-json' });
+        errorFindUnique.mockResolvedValue({ data: 'invalid-json' });
 
         // Function that calls warn
         await logOnly.destroy('');
@@ -681,18 +681,18 @@ describe('PrismaSessionStore', () => {
         const warn = jest.fn();
         const error = jest.fn();
 
-        const [singleLevel, { findOneMock: singleFindOne }] = freshStore({
+        const [singleLevel, { findUniqueMock: singleFindUnique }] = freshStore({
           logger: { log, warn, error },
           loggerLevel: 'error',
         });
 
-        const [loggerArray, { findOneMock: arrayFindOne }] = freshStore({
+        const [loggerArray, { findUniqueMock: arrayFindUnique }] = freshStore({
           logger: { log, warn, error },
           loggerLevel: ['warn', 'log'],
         });
 
-        singleFindOne.mockResolvedValue({ data: 'invalid-json' });
-        arrayFindOne.mockResolvedValue({ data: 'invalid-json' });
+        singleFindUnique.mockResolvedValue({ data: 'invalid-json' });
+        arrayFindUnique.mockResolvedValue({ data: 'invalid-json' });
 
         // Function that calls warn
         await singleLevel.destroy('');

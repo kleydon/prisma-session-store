@@ -9,7 +9,7 @@ interface ICreatePrismaSession extends IPrismaSession {
   data: string;
 }
 
-interface IFindOneArgs {
+interface IFindUniqueArgs {
   select?: {
     expires?: boolean;
     sid?: boolean;
@@ -49,7 +49,7 @@ export interface IPrisma {
     delete(args: IDeleteArgs): Promise<IPrismaSession>;
     deleteMany(args?: unknown): Promise<unknown>;
     findMany(args?: IFindManyArgs): Promise<IPrismaSession[]>;
-    findOne(args: IFindOneArgs): Promise<IPrismaSession | null>;
+    findUnique(args: IFindUniqueArgs): Promise<IPrismaSession | null>;
     update(args: IUpdateArgs): Promise<IPrismaSession>;
   };
   $connect(): Promise<void>;

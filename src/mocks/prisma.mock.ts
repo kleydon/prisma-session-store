@@ -6,7 +6,7 @@ export const createPrismaMock = () => {
   const deleteMock = jest.fn();
   const deleteManyMock = jest.fn();
   const findManyMock = jest.fn();
-  const findOneMock = jest.fn();
+  const findUniqueMock = jest.fn();
   const updateMock = jest.fn();
 
   const prisma = {
@@ -17,14 +17,14 @@ export const createPrismaMock = () => {
       delete: deleteMock,
       deleteMany: deleteManyMock,
       findMany: findManyMock,
-      findOne: findOneMock,
+      findUnique: findUniqueMock,
       update: updateMock,
     },
   };
 
   connectMock.mockResolvedValue(undefined);
   disconnectMock.mockResolvedValue(undefined);
-  findOneMock.mockResolvedValue(null);
+  findUniqueMock.mockResolvedValue(null);
   findManyMock.mockResolvedValue([]);
   deleteManyMock.mockResolvedValue([]);
 
@@ -39,7 +39,7 @@ export const createPrismaMock = () => {
       deleteMock,
       deleteManyMock,
       findManyMock,
-      findOneMock,
+      findUniqueMock,
       updateMock,
     },
   ] as const;
