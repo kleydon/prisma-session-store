@@ -192,7 +192,7 @@ export class PrismaSessionStore extends Store {
     if (!(await this.validateConnection())) return callback?.();
 
     const session = await this.prisma.session
-      .findOne({
+      .findUnique({
         where: { sid },
       })
       .catch(() => null);
@@ -325,7 +325,7 @@ export class PrismaSessionStore extends Store {
     }
 
     const existingSession = await this.prisma.session
-      .findOne({
+      .findUnique({
         where: { sid },
       })
       .catch(() => null);
@@ -399,7 +399,7 @@ export class PrismaSessionStore extends Store {
     const expires = createExpiration(ttl, { rounding: this.options.roundTTL });
 
     try {
-      const existingSession = await this.prisma.session.findOne({
+      const existingSession = await this.prisma.session.findUnique({
         where: { sid },
       });
 

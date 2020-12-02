@@ -20,7 +20,7 @@ const { PrismaSessionStore } = require('@quixo3/prisma-session-store');
 ...
 
 app.use(
-  session({
+  expressSession({
     cookie: {
      maxAge: 7 * 24 * 60 * 60 * 1000 // ms
     },
@@ -30,7 +30,7 @@ app.use(
       {
         checkPeriod: 2 * 60 * 1000,  //ms
         dbRecordIdIsSessionId: true,
-        dbRecordIdFunction: null,
+        dbRecordIdFunction: undefined,
       }
     )
   })
@@ -49,7 +49,7 @@ import { PrismaSessionStore } from '@quixo3/prisma-session-store';
 ...
 
 app.use(
-  session({
+  expressSession({
     cookie: {
      maxAge: 7 * 24 * 60 * 60 * 1000 // ms
     },
@@ -59,7 +59,7 @@ app.use(
       {
         checkPeriod: 2 * 60 * 1000,  //ms
         dbRecordIdIsSessionId: true,
-        dbRecordIdFunction: null,
+        dbRecordIdFunction: undefined,
       }
     )
   })
@@ -99,7 +99,7 @@ model Session {
 
 Don't forget to run `prisma generate` to generate your PrismaClient.
 
-#### GraphQL Nexus
+#### Types - GraphQL Nexus
 
 If you are using [@nexus/schema](https://www.npmjs.com/package/@nexus/schema) you can define your Session type:
 
