@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/kleydon/prisma-session-store/compare/v1.1.1...v1.1.2) (2020-12-02)
+
+
+### Bug Fixes
+
+* changed findOne to findUnique, for Prisma 2.12.0+ ([f1311c1](https://github.com/kleydon/prisma-session-store/commit/f1311c12e7df3cec10ef1ff4cecaf305ed34ca91))
+
 ## [1.1.1](https://github.com/kleydon/prisma-session-store/compare/v1.1.0...v1.1.1) (2020-11-26)
 
 
