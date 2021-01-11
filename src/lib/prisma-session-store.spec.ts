@@ -6,6 +6,15 @@ import { createPrismaMock } from '../mocks';
 import { PrismaSessionStore } from './prisma-session-store';
 import { createExpiration, range, sleep } from './utils/testing';
 
+declare module 'express-session' {
+  // tslint:disable-next-line: naming-convention
+  interface SessionData {
+    sample?: boolean;
+    unrealizable?: string;
+    data?: string;
+  }
+}
+
 jest.mock('./utils/defer', () => ({
   defer: (fn: Function, ...args: unknown[]) => fn(...args),
 }));
