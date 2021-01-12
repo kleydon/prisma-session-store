@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/kleydon/prisma-session-store/compare/v1.1.2...v2.0.0) (2021-01-12)
+
+
+* fix!: update downstream dependencies ([fa7ee82](https://github.com/kleydon/prisma-session-store/commit/fa7ee82a809420a7984b60576956fe6206db27e2))
+
+
+### BREAKING CHANGES
+
+* Changes to the types from `@types/express-session` and `@types/express`
+
+Signed-off-by: William Sedlacek <wsedlacekc@gmail.com>
+
 ## [1.1.2](https://github.com/kleydon/prisma-session-store/compare/v1.1.1...v1.1.2) (2020-12-02)
 
 
