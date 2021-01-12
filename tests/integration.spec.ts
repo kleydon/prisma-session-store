@@ -10,13 +10,20 @@ import request from 'supertest';
 
 import { PrismaSessionStore } from '../src';
 
+declare module 'express-session' {
+  // tslint:disable-next-line: naming-convention
+  interface SessionData {
+    data?: string;
+  }
+}
+
 describe('integration testing', () => {
   const app = express();
   const prisma = new PrismaClient();
 
   beforeAll(() => {
     if (!existsSync(join(__dirname, '../prisma/dev.db')))
-      execSync('prisma migrate up --experimental --create-db');
+      execSync('prisma migrate dev --preview-feature');
 
     app.use(
       session({
@@ -34,23 +41,19 @@ describe('integration testing', () => {
     });
 
     app.post('/', (req, res) => {
-      if (req.session) req.session.data = 'TESTING';
+      req.session.data = 'TESTING';
       res.json(req.session?.data);
     });
 
     app.put('/', (req, res) => {
-      if (req.session) req.session.data = 'UPDATED';
+      req.session.data = 'UPDATED';
       res.json(req.session?.data);
     });
 
     app.delete('/', (req, res) => {
-      if (req.session) {
-        req.session.destroy(() => {
-          res.json(req.session?.data);
-        });
-      } else {
-        res.status(500).json({ error: 'Could not delete session' });
-      }
+      req.session.destroy(() => {
+        res.json(req.session?.data);
+      });
     });
   });
 

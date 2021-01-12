@@ -121,7 +121,7 @@ If you are using [@nexus/schema](https://www.npmjs.com/package/@nexus/schema) yo
 
 #### Database
 
-If you are using Prisma's migrations you can simply run `prisma migrate save` and `prisma migrate up` to migrate your database.
+If you are using Prisma's migrations you can simply run `prisma migrate dev` to migrate your database.
 If you are using something other then `prisma` then you will need to manage the migrations yourself and you check the [Prisma Documentation](https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch-sql-typescript-postgres#create-database-tables-with-sql) on the subject if you need help.
 
 #### MySQL

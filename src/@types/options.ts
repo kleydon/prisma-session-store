@@ -1,3 +1,4 @@
+import type { SessionData } from 'express-session';
 import type { PartialDeep } from 'type-fest';
 
 import { ILevel, ILogger } from './logger';
@@ -10,7 +11,7 @@ import { ISerializer } from './serializer';
  */
 export type TTLFactory = (
   options: IOptions,
-  session: PartialDeep<Express.SessionData>,
+  session: PartialDeep<SessionData>,
   sid: string
 ) => number;
 
@@ -75,7 +76,7 @@ export interface IOptions {
   /**
    * By default, if you set a `maxAge`, it'll only actually pull stale
    * items out of the cache when you `get(key)`. (That is, it's not
-   * pre-emptively doing a `setTimeout` or anything.) If you set
+   * preemptively doing a `setTimeout` or anything.) If you set
    * `stale:true`, it'll return the stale value before deleting it.
    * If you don't set this, then it'll return `undefined` when you
    * try to get a stale entry, as if it had already been deleted.

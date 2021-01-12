@@ -16,6 +16,16 @@ export class ManagedLogger {
   ) {}
 
   /**
+   * Check if logging is enabled for a given severity level
+   * @param level The level to check if logging is enabled for
+   */
+  private checkLevel(level: ILevel): boolean {
+    return Array.isArray(this.level)
+      ? this.level.includes(level)
+      : this.level === level;
+  }
+
+  /**
    * Logs out errors via the logger if the `error` level is enabled
    * @param error the error to log
    */
@@ -37,15 +47,5 @@ export class ManagedLogger {
    */
   public warn(message: string): void {
     if (this.logger && this.checkLevel('warn')) this.logger.warn?.(message);
-  }
-
-  /**
-   * Check if logging is enabled for a given severity level
-   * @param level The level to check if logging is enabled for
-   */
-  private checkLevel(level: ILevel): boolean {
-    return Array.isArray(this.level)
-      ? this.level.includes(level)
-      : this.level === level;
   }
 }

@@ -1,5 +1,5 @@
 import cuid from 'cuid';
-import { Store } from 'express-session';
+import { SessionData, Store } from 'express-session';
 import { dedent } from 'ts-dedent';
 import type { PartialDeep } from 'type-fest';
 
@@ -95,6 +95,48 @@ export class PrismaSessionStore extends Store {
   private readonly serializer = this.options.serializer ?? JSON;
 
   /**
+   * Attempts to connect to Prisma, displaying a pretty error if the connection is not possible.
+   */
+  private async connect(): Promise<void> {
+    await this.prisma?.$connect?.();
+    await this.validateConnection();
+  }
+
+  /**
+   * @description A function to generate the Prisma Record ID for a given session ID
+   *
+   * Note: If undefined and dbRecordIdIsSessionId is also undefined then a random
+   * CUID will be used instead.
+   */
+  private readonly dbRecordIdFunction = (sid: string) =>
+    this.options.dbRecordIdFunction?.(sid) ?? cuid();
+
+  /**
+   * Disables store, used when prisma cannot be connected to
+   */
+  private disable(): void {
+    this.invalidConnection = true;
+  }
+
+  /**
+   * Returns if the connect is valid or not, logging an error if it is not.
+   */
+  private async validateConnection(): Promise<boolean> {
+    await (
+      this.prisma?.$connect?.() ??
+      Promise.reject(new Error('Could not connect'))
+    ).catch(() => {
+      this.disable();
+      this.stopInterval();
+      this.logger.error(dedent`Could not connect to Sessions model in Prisma.
+      Please make sure that prisma is setup correctly and that your migrations are current.
+      For more information check out https://github.com/kleydon/prisma-session-store`);
+    });
+
+    return !this.invalidConnection;
+  }
+
+  /**
    * Fetch all sessions
    *
    * @param callback a callback providing all session data
@@ -113,10 +155,7 @@ export class PrismaSessionStore extends Store {
       const result = sessions
         .map(
           ({ sid, data }) =>
-            [
-              sid,
-              this.serializer.parse(data ?? '{}') as Express.SessionData,
-            ] as const
+            [sid, this.serializer.parse(data ?? '{}') as SessionData] as const
         )
         .reduce<ISessions>(
           (prev, [sid, data]) => ({ ...prev, [sid]: data }),
@@ -187,7 +226,7 @@ export class PrismaSessionStore extends Store {
    */
   public readonly get = async (
     sid: string,
-    callback?: (err?: unknown, val?: Express.SessionData) => void
+    callback?: (err?: unknown, val?: SessionData) => void
   ) => {
     if (!(await this.validateConnection())) return callback?.();
 
@@ -200,9 +239,7 @@ export class PrismaSessionStore extends Store {
     if (session === null) return callback?.();
 
     try {
-      const result = this.serializer.parse(
-        session.data ?? '{}'
-      ) as Express.SessionData;
+      const result = this.serializer.parse(session.data ?? '{}') as SessionData;
       if (callback) defer(callback, undefined, result);
 
       return result;
@@ -246,9 +283,10 @@ export class PrismaSessionStore extends Store {
    * or an error that occurred
    */
   public readonly length = async (
-    callback?: (err?: unknown, length?: number) => void
+    callback?: (err: unknown, length: number) => void
   ) => {
-    if (!(await this.validateConnection())) return callback?.();
+    if (!(await this.validateConnection()))
+      return callback?.(new Error('Could not connect'), 0);
 
     // XXX More efficient way? XXX
 
@@ -306,7 +344,7 @@ export class PrismaSessionStore extends Store {
    */
   public readonly set = async (
     sid: string,
-    session: PartialDeep<Express.SessionData>,
+    session: PartialDeep<SessionData>,
     callback?: (err?: unknown) => void
   ) => {
     if (!(await this.validateConnection())) return callback?.();
@@ -390,7 +428,7 @@ export class PrismaSessionStore extends Store {
    */
   public readonly touch = async (
     sid: string,
-    session: PartialDeep<Express.SessionData>,
+    session: PartialDeep<SessionData>,
     callback?: (err?: unknown) => void
   ) => {
     if (!(await this.validateConnection())) return callback?.();
@@ -425,46 +463,4 @@ export class PrismaSessionStore extends Store {
       if (callback) defer(callback, e);
     }
   };
-
-  /**
-   * Attempts to connect to Prisma, displaying a pretty error if the connection is not possible.
-   */
-  private async connect(): Promise<void> {
-    await this.prisma?.$connect?.();
-    await this.validateConnection();
-  }
-
-  /**
-   * @description A function to generate the Prisma Record ID for a given session ID
-   *
-   * Note: If undefined and dbRecordIdIsSessionId is also undefined then a random
-   * CUID will be used instead.
-   */
-  private readonly dbRecordIdFunction = (sid: string) =>
-    this.options.dbRecordIdFunction?.(sid) ?? cuid();
-
-  /**
-   * Disables store, used when prisma cannot be connected to
-   */
-  private disable(): void {
-    this.invalidConnection = true;
-  }
-
-  /**
-   * Returns if the connect is valid or not, logging an error if it is not.
-   */
-  private async validateConnection(): Promise<boolean> {
-    await (
-      this.prisma?.$connect?.() ??
-      Promise.reject(new Error('Could not connect'))
-    ).catch(() => {
-      this.disable();
-      this.stopInterval();
-      this.logger.error(dedent`Could not connect to Sessions model in Prisma.
-      Please make sure that prisma is setup correctly and that your migrations are current.
-      For more information check out https://github.com/kleydon/prisma-session-store`);
-    });
-
-    return !this.invalidConnection;
-  }
 }

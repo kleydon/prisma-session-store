@@ -1,3 +1,4 @@
+import type { SessionData } from 'express-session';
 import type { PartialDeep } from 'type-fest';
 
 import type { IOptions } from '../../@types';
@@ -12,7 +13,7 @@ import { ONE_DAY_MS } from './constants';
  */
 export const getTTL = (
   options: Pick<IOptions, 'ttl'>,
-  session: PartialDeep<Express.SessionData>,
+  session: PartialDeep<SessionData>,
   sid: string
 ) => {
   if (typeof options.ttl === 'number') return options.ttl;
