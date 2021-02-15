@@ -1,6 +1,6 @@
 export interface IPrismaSession {
   data: string | null;
-  expires: Date;
+  expiresAt: Date;
   id: string;
   sid: string;
 }
@@ -11,7 +11,7 @@ interface ICreatePrismaSession extends IPrismaSession {
 
 interface IFindUniqueArgs {
   select?: {
-    expires?: boolean;
+    expiresAt?: boolean;
     sid?: boolean;
   };
   where: {
@@ -22,7 +22,7 @@ interface IFindUniqueArgs {
 interface IFindManyArgs {
   select?: {
     data?: boolean;
-    expires?: boolean;
+    expiresAt?: boolean;
     sid?: boolean;
   };
   where?: {
