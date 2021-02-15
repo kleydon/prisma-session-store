@@ -351,7 +351,7 @@ export class PrismaSessionStore extends Store {
 
     const ttl = getTTL(this.options, session, sid);
     const expiresAt = createExpiration(ttl, {
-      rounding: this.options.roundTTL
+      rounding: this.options.roundTTL,
     });
 
     let sessionString;
@@ -437,7 +437,7 @@ export class PrismaSessionStore extends Store {
 
     const ttl = getTTL(this.options, session, sid);
     const expiresAt = createExpiration(ttl, {
-      rounding: this.options.roundTTL
+      rounding: this.options.roundTTL,
     });
 
     try {
