@@ -350,7 +350,9 @@ export class PrismaSessionStore extends Store {
     if (!(await this.validateConnection())) return callback?.();
 
     const ttl = getTTL(this.options, session, sid);
-    const expiresAt = createExpiration(ttl, { rounding: this.options.roundTTL });
+    const expiresAt = createExpiration(ttl, {
+      rounding: this.options.roundTTL
+    });
 
     let sessionString;
     try {
@@ -434,7 +436,9 @@ export class PrismaSessionStore extends Store {
     if (!(await this.validateConnection())) return callback?.();
 
     const ttl = getTTL(this.options, session, sid);
-    const expiresAt = createExpiration(ttl, { rounding: this.options.roundTTL });
+    const expiresAt = createExpiration(ttl, {
+      rounding: this.options.roundTTL
+    });
 
     try {
       const existingSession = await this.prisma.session.findUnique({
