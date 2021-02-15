@@ -93,7 +93,7 @@ model Session {
   id        String   @id
   sid       String   @unique
   data      String
-  expires   DateTime
+  expiresAt   DateTime
 }
 ```
 
@@ -112,7 +112,7 @@ If you are using [@nexus/schema](https://www.npmjs.com/package/@nexus/schema) yo
     t.model.id();
     t.model.sid();
     t.model.data();
-    t.model.expires();
+    t.model.expiresAt();
   }
 }
 ...
@@ -136,6 +136,11 @@ ALTER TABLE Session MODIFY data TEXT;
 Prisma `String` properties are mapped to `VARCHAR(191)` by default. Session data can be larger than 191 characters so updating the type to `TEXT` prevents errors when creating and updating sessions. If you know your session data will not exceed 191 characters you can skip this step or if you know your maximum size you can use `VARCHAR(YOUR_MAX_SIZE)`
 
 If you are using a version of Prisma that supports [migrating with native types](https://github.com/prisma/prisma/issues/4330) you can use a type annotation in your `schema.prisma` file instead of manually modifying your data column.
+
+## Migrating from versions following `2.0.0`
+
+Following version `2.0.0`, the `Session` `expires` field was renamed to `expiresAt` to match Prisma's naming convention for date fields.
+
 
 ## Migrating from versions prior to `1.0.0`
 

@@ -361,8 +361,8 @@ describe('PrismaSessionStore', () => {
       });
 
       findManyMock.mockResolvedValueOnce([
-        { sid: 'sid-0', expires: createExpiration(-1, { rounding: 100 }) },
-        { sid: 'sid-1', expires: createExpiration(500, { rounding: 100 }) },
+        { sid: 'sid-0', expiresAt: createExpiration(-1, { rounding: 100 }) },
+        { sid: 'sid-1', expiresAt: createExpiration(500, { rounding: 100 }) },
       ]);
       deleteMock.mockResolvedValue(undefined);
 
@@ -729,7 +729,7 @@ describe('PrismaSessionStore', () => {
         });
         deleteMock.mockResolvedValue(undefined);
         findManyMock.mockResolvedValue([
-          { expires: createExpiration(-1, { rounding: 100 }) },
+          { expiresAt: createExpiration(-1, { rounding: 100 }) },
         ]);
 
         await sleep(10);
@@ -745,7 +745,7 @@ describe('PrismaSessionStore', () => {
         });
 
         findManyMock.mockResolvedValue([
-          { expires: createExpiration(-1, { rounding: 100 }) },
+          { expiresAt: createExpiration(-1, { rounding: 100 }) },
         ]);
 
         await sleep(10);
@@ -761,7 +761,7 @@ describe('PrismaSessionStore', () => {
 
         expect(createMock).toHaveBeenCalledWith({
           data: expect.objectContaining({
-            expires: createExpiration(500, { rounding: 100 }),
+            expiresAt: createExpiration(500, { rounding: 100 }),
           }),
         });
       });
@@ -776,7 +776,7 @@ describe('PrismaSessionStore', () => {
 
         expect(createMock).toHaveBeenCalledWith({
           data: expect.objectContaining({
-            expires: createExpiration(500, { rounding: 100 }),
+            expiresAt: createExpiration(500, { rounding: 100 }),
           }),
         });
       });
@@ -797,7 +797,7 @@ describe('PrismaSessionStore', () => {
 
         expect(createMock).toHaveBeenCalledWith({
           data: expect.objectContaining({
-            expires: createExpiration(100, { rounding: 100 }),
+            expiresAt: createExpiration(100, { rounding: 100 }),
           }),
         });
       });
@@ -809,7 +809,7 @@ describe('PrismaSessionStore', () => {
 
         expect(createMock).toHaveBeenCalledWith({
           data: expect.objectContaining({
-            expires: createExpiration(500, { rounding: 100 }),
+            expiresAt: createExpiration(500, { rounding: 100 }),
           }),
         });
       });
