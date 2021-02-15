@@ -68,3 +68,4 @@ dist
 # Testing
 coverage
 prisma/dev.db
+prisma/migrations/**

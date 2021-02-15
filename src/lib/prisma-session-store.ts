@@ -315,17 +315,17 @@ export class PrismaSessionStore extends Store {
     this.logger.log('Checking for any expired sessions...');
     const sessions = await this.prisma.session.findMany({
       select: {
-        expires: true,
+        expiresAt: true,
         sid: true,
       },
     });
 
     for (const session of sessions) {
       const now = new Date();
-      const remainingSec = (session.expires.valueOf() - now.valueOf()) / 1000;
+      const remainingSec = (session.expiresAt.valueOf() - now.valueOf()) / 1000;
       this.logger.log(`session:${session.sid} expires in ${remainingSec}sec`);
 
-      if (now.valueOf() >= session.expires.valueOf()) {
+      if (now.valueOf() >= session.expiresAt.valueOf()) {
         this.logger.log(`Deleting session with sid: ${session.sid}`);
         await this.prisma.session.delete({
           where: { sid: session.sid },
@@ -350,7 +350,7 @@ export class PrismaSessionStore extends Store {
     if (!(await this.validateConnection())) return callback?.();
 
     const ttl = getTTL(this.options, session, sid);
-    const expires = createExpiration(ttl, { rounding: this.options.roundTTL });
+    const expiresAt = createExpiration(ttl, { rounding: this.options.roundTTL });
 
     let sessionString;
     try {
@@ -370,7 +370,7 @@ export class PrismaSessionStore extends Store {
 
     const data = {
       sid,
-      expires,
+      expiresAt,
       data: sessionString,
       id: this.dbRecordIdIsSessionId ? sid : this.dbRecordIdFunction(sid),
     };
@@ -434,7 +434,7 @@ export class PrismaSessionStore extends Store {
     if (!(await this.validateConnection())) return callback?.();
 
     const ttl = getTTL(this.options, session, sid);
-    const expires = createExpiration(ttl, { rounding: this.options.roundTTL });
+    const expiresAt = createExpiration(ttl, { rounding: this.options.roundTTL });
 
     try {
       const existingSession = await this.prisma.session.findUnique({
@@ -450,7 +450,7 @@ export class PrismaSessionStore extends Store {
         await this.prisma.session.update({
           where: { sid: existingSession.sid },
           data: {
-            expires,
+            expiresAt,
             data: this.serializer.stringify(existingSessionData),
           },
         });
