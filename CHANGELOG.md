@@ -1,3 +1,10 @@
+## [3.0.1](https://github.com/kleydon/prisma-session-store/compare/v3.0.0...v3.0.1) (2021-02-16)
+
+
+### Bug Fixes
+
+* peer dependency version ([cd71f7d](https://github.com/kleydon/prisma-session-store/commit/cd71f7d1c6accf063e6701a6c21ce4b6695a483d))
+
 # [3.0.0](https://github.com/kleydon/prisma-session-store/compare/v2.0.0...v3.0.0) (2021-02-16)
 
 
