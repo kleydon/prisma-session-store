@@ -1,3 +1,13 @@
+# [3.0.0](https://github.com/kleydon/prisma-session-store/compare/v2.0.0...v3.0.0) (2021-02-16)
+
+
+* feat!: changed expires to expiresAt ([5cbc11b](https://github.com/kleydon/prisma-session-store/commit/5cbc11bcf8f8a0b9255dd57e1eb64b0b923636d7))
+
+
+### BREAKING CHANGES
+
+* expiresAt now used in place of expires - within Prisma schema and database.
+
 # [2.0.0](https://github.com/kleydon/prisma-session-store/compare/v1.1.2...v2.0.0) (2021-01-12)
 
 
