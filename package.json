@@ -49,7 +49,7 @@
   },
   "peerDependencies": {
     "@prisma/client": ">=2.16.1",
-    "express-session": ">=1.17.3"
+    "express-session": ">=1.17.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^11.0.0",
