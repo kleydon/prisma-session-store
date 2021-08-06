@@ -95,6 +95,12 @@ export class PrismaSessionStore extends Store {
   private readonly serializer = this.options.serializer ?? JSON;
 
   /**
+   * @description The name of the sessions model
+   */
+  private readonly sessionModelName =
+    this.options.sessionModelName ?? 'session';
+
+  /**
    * Attempts to connect to Prisma, displaying a pretty error if the connection is not possible.
    */
   private async connect(): Promise<void> {
@@ -148,7 +154,7 @@ export class PrismaSessionStore extends Store {
     if (!(await this.validateConnection())) return callback?.();
 
     try {
-      const sessions = await this.prisma.session.findMany({
+      const sessions = await this.prisma[this.sessionModelName].findMany({
         select: { sid: true, data: true },
       });
 
@@ -181,7 +187,7 @@ export class PrismaSessionStore extends Store {
     if (!(await this.validateConnection())) return callback?.();
 
     try {
-      await this.prisma.session.deleteMany();
+      await this.prisma[this.sessionModelName].deleteMany();
 
       if (callback) defer(callback);
     } catch (e: unknown) {
@@ -206,7 +212,7 @@ export class PrismaSessionStore extends Store {
       if (Array.isArray(sid)) {
         await Promise.all(sid.map(async (s) => this.destroy(s, callback)));
       } else {
-        await this.prisma.session.delete({ where: { sid } });
+        await this.prisma[this.sessionModelName].delete({ where: { sid } });
       }
     } catch (e: unknown) {
       this.logger.warn(
@@ -229,8 +235,8 @@ export class PrismaSessionStore extends Store {
     callback?: (err?: unknown, val?: SessionData) => void
   ) => {
     if (!(await this.validateConnection())) return callback?.();
-
-    const session = await this.prisma.session
+    console.log('THIS.sessionModelName', this.sessionModelName);
+    const session = await this.prisma[this.sessionModelName]
       .findUnique({
         where: { sid },
       })
@@ -263,7 +269,7 @@ export class PrismaSessionStore extends Store {
     // XXX More efficient way? XXX
 
     try {
-      const sessions = await this.prisma.session.findMany({
+      const sessions = await this.prisma[this.sessionModelName].findMany({
         select: { sid: true },
       });
 
@@ -291,7 +297,7 @@ export class PrismaSessionStore extends Store {
     // XXX More efficient way? XXX
 
     try {
-      const sessions = await this.prisma.session.findMany({
+      const sessions = await this.prisma[this.sessionModelName].findMany({
         select: { sid: true }, // Limit what gets sent back; can't be empty.
       });
 
@@ -313,7 +319,7 @@ export class PrismaSessionStore extends Store {
     // XXX More efficient way? Maybe when filtering is fully implemented? XXX
 
     this.logger.log('Checking for any expired sessions...');
-    const sessions = await this.prisma.session.findMany({
+    const sessions = await this.prisma[this.sessionModelName].findMany({
       select: {
         expiresAt: true,
         sid: true,
@@ -327,7 +333,7 @@ export class PrismaSessionStore extends Store {
 
       if (now.valueOf() >= session.expiresAt.valueOf()) {
         this.logger.log(`Deleting session with sid: ${session.sid}`);
-        await this.prisma.session.delete({
+        await this.prisma[this.sessionModelName].delete({
           where: { sid: session.sid },
         });
       }
@@ -364,7 +370,7 @@ export class PrismaSessionStore extends Store {
       return;
     }
 
-    const existingSession = await this.prisma.session
+    const existingSession = await this.prisma[this.sessionModelName]
       .findUnique({
         where: { sid },
       })
@@ -378,12 +384,12 @@ export class PrismaSessionStore extends Store {
     };
 
     if (existingSession !== null) {
-      await this.prisma.session.update({
+      await this.prisma[this.sessionModelName].update({
         data,
         where: { sid },
       });
     } else {
-      await this.prisma.session.create({
+      await this.prisma[this.sessionModelName].create({
         data: { ...data, data: sessionString },
       });
     }
@@ -441,7 +447,9 @@ export class PrismaSessionStore extends Store {
     });
 
     try {
-      const existingSession = await this.prisma.session.findUnique({
+      const existingSession = await this.prisma[
+        this.sessionModelName
+      ].findUnique({
         where: { sid },
       });
 
@@ -451,7 +459,7 @@ export class PrismaSessionStore extends Store {
           cookie: session.cookie,
         };
 
-        await this.prisma.session.update({
+        await this.prisma[this.sessionModelName].update({
           where: { sid: existingSession.sid },
           data: {
             expiresAt,

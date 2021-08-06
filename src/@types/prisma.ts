@@ -43,8 +43,8 @@ interface IDeleteArgs {
   where: { sid: string };
 }
 
-export interface IPrisma {
-  session: {
+export type IPrisma = {
+  [key: string]: {
     create(args: ICreateArgs): Promise<IPrismaSession>;
     delete(args: IDeleteArgs): Promise<IPrismaSession>;
     deleteMany(args?: unknown): Promise<unknown>;
@@ -52,6 +52,7 @@ export interface IPrisma {
     findUnique(args: IFindUniqueArgs): Promise<IPrismaSession | null>;
     update(args: IUpdateArgs): Promise<IPrismaSession>;
   };
+} & {
   $connect(): Promise<void>;
   $disconnect(): Promise<void>;
-}
+};

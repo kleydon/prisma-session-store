@@ -92,6 +92,11 @@ export interface IOptions {
   ttl?: number | TTLFactory;
 
   /**
+   * "Session Table Name"
+   * defines session table name. Defaults to sessions, or
+   */
+  sessionModelName?: string;
+  /**
    * A function to generate the Prisma Record ID for a given session ID
    *
    * Note: If undefined and dbRecordIdIsSessionId is also undefined then a random
