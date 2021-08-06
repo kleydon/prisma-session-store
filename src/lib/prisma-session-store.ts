@@ -235,7 +235,6 @@ export class PrismaSessionStore extends Store {
     callback?: (err?: unknown, val?: SessionData) => void
   ) => {
     if (!(await this.validateConnection())) return callback?.();
-    console.log('THIS.sessionModelName', this.sessionModelName);
     const session = await this.prisma[this.sessionModelName]
       .findUnique({
         where: { sid },
