@@ -93,7 +93,7 @@ export interface IOptions {
 
   /**
    * "Session Table Name"
-   * defines session table name. Defaults to sessions, or
+   * defines session table name. Defaults to sessions
    */
   sessionModelName?: string;
   /**
