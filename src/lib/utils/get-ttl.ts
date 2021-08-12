@@ -11,8 +11,8 @@ import { ONE_DAY_MS } from './constants';
  * @param session the session data
  * @param sid the id of the current session
  */
-export const getTTL = (
-  options: Pick<IOptions, 'ttl'>,
+export const getTTL = <M extends string>(
+  options: Pick<IOptions<M>, 'ttl'>,
   session: PartialDeep<SessionData>,
   sid: string
 ) => {
