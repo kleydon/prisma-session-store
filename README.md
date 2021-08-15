@@ -25,6 +25,8 @@ app.use(
      maxAge: 7 * 24 * 60 * 60 * 1000 // ms
     },
     secret: 'a santa at nasa',
+    resave: true,
+    saveUninitialized: true,
     store: new PrismaSessionStore(
       prisma,
       {
@@ -54,6 +56,8 @@ app.use(
      maxAge: 7 * 24 * 60 * 60 * 1000 // ms
     },
     secret: 'a santa at nasa',
+    resave: true,
+    saveUninitialized: true,
     store: new PrismaSessionStore(
       prisma,
       {
