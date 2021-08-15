@@ -101,7 +101,7 @@ model Session {
 }
 ```
 
-Don't forget to run `prisma generate` to generate your PrismaClient.
+Don't forget to run `npx prisma generate` to generate your PrismaClient.
 
 #### Types - GraphQL Nexus
 
