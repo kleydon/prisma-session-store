@@ -18,7 +18,7 @@ export type TTLFactory = (
 /**
  * PrismaSessionStore options to alter the way the store behaves
  */
-export interface IOptions {
+export interface IOptions<M extends string = 'session'> {
   /**
    * Interval, in ms, at which PrismaSessionStore will automatically remove
    * expired sessions. Disabled by default; set to something reasonable.
@@ -90,6 +90,12 @@ export interface IOptions {
    * `(options, session, sid) => number`.
    */
   ttl?: number | TTLFactory;
+
+  /**
+   * "Session Table Name"
+   * defines session table name. Defaults to sessions
+   */
+  sessionModelName?: Exclude<M, `$${string}`>;
 
   /**
    * A function to generate the Prisma Record ID for a given session ID

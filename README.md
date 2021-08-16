@@ -145,7 +145,6 @@ If you are using a version of Prisma that supports [migrating with native types]
 
 Following version `2.0.0`, the `Session` `expires` field was renamed to `expiresAt` to match Prisma's naming convention for date fields.
 
-
 ## Migrating from versions prior to `1.0.0`
 
 In `1.0.0` the public API of this library was reworked. Previously the default export that was a
@@ -205,6 +204,8 @@ CUID will be used instead.
 - `noDisposeOnSet` By default, if you set a `dispose()` method, then it'll be called whenever a `set()` operation overwrites an existing key. If you set this option, `dispose()` will only be called when a key falls out of the cache, not when it is overwritten.
 
 - `serializer` An object containing `stringify` and `parse` methods compatible with Javascript's `JSON` to override the serializer used.
+
+- `sessionModelName` By default, the session table is called `sessions` and the associated model is `session`, but you can provide a custom model name. This should be the camelCase version of the name.
 
 Three new options were added apart from the work that was already done by [memorystore](https://github.com/roccomuso/memorystore), two of them relate to logging and allow you to inject your own logger object giving you flexibility to log outputs to something like NestJS or whenever you would like, even saving them to disk if that's what you want. And the third is used for testing to round the TTL so that it can be compared do another generated ttl during the assertion.
 

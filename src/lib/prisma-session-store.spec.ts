@@ -23,10 +23,12 @@ jest.mock('./utils/defer', () => ({
  * Creates a new `PrismaSessionStore` and prisma mock
  * @param options any specific options related to what you are testing
  */
-const freshStore = (options: IOptions = {}) => {
+const freshStore = <M extends 'session' | 'otherSession' = 'session'>(
+  options: IOptions<M> = {}
+) => {
   const [prisma, mocks] = createPrismaMock();
 
-  const store = new PrismaSessionStore(prisma, {
+  const store = new PrismaSessionStore<M>(prisma, {
     logger: false,
     dbRecordIdIsSessionId: !options.dbRecordIdFunction,
     ...options,
@@ -814,5 +816,19 @@ describe('PrismaSessionStore', () => {
         });
       });
     });
+  });
+
+  it('should run with other sessions', async () => {
+    const [store, { otherFindManyMock }] = freshStore({
+      sessionModelName: 'otherSession',
+    });
+
+    const callback = jest.fn();
+
+    otherFindManyMock.mockResolvedValue(range(10).map((sid) => ({ sid })));
+
+    await store.ids(callback);
+
+    expect(callback).toHaveBeenCalledWith(undefined, range(10));
   });
 });
