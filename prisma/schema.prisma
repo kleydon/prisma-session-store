@@ -16,3 +16,10 @@ model Session {
   data    String
   expiresAt DateTime
 }
+
+model OtherSession {
+  id      String   @id
+  sid     String   @unique
+  data    String
+  expiresAt DateTime
+}

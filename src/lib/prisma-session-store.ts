@@ -29,7 +29,7 @@ import { createExpiration, defer, getTTL } from './utils';
  * );
  * ```
  */
-export class PrismaSessionStore extends Store {
+export class PrismaSessionStore<M extends string = 'session'> extends Store {
   /**
    * Initialize PrismaSessionStore with the given `prisma` and (optional) `options`.
    *
@@ -54,8 +54,8 @@ export class PrismaSessionStore extends Store {
    * ```
    */
   constructor(
-    private readonly prisma: IPrisma,
-    private readonly options: IOptions
+    private readonly prisma: IPrisma<M>,
+    private readonly options: IOptions<M>
   ) {
     super();
     this.startInterval();
@@ -96,9 +96,11 @@ export class PrismaSessionStore extends Store {
 
   /**
    * @description The name of the sessions model
+   *
+   * Defaults to `session` if `sessionModelName` in options is undefined
    */
-  private readonly sessionModelName =
-    this.options.sessionModelName ?? 'session';
+  private readonly sessionModelName: Exclude<M, `$${string}`> =
+    this.options.sessionModelName ?? ('session' as Exclude<M, `$${string}`>);
 
   /**
    * Attempts to connect to Prisma, displaying a pretty error if the connection is not possible.

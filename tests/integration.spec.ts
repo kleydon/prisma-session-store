@@ -32,6 +32,7 @@ describe('integration testing', () => {
         saveUninitialized: false,
         store: new PrismaSessionStore(prisma, {
           logger: false,
+          sessionModelName: 'otherSession',
         }),
       })
     );
@@ -62,14 +63,14 @@ describe('integration testing', () => {
   });
 
   beforeEach(async () => {
-    await prisma.session.deleteMany({});
+    await prisma.otherSession.deleteMany({});
   });
 
   it('should not initialize a user session when the session is not modified', async () => {
     await request(app)
       .get('/')
       .expect(async ({ headers }) => {
-        const sessions = await prisma.session.findMany();
+        const sessions = await prisma.otherSession.findMany();
         expect(sessions).toHaveLength(0);
         expect(headers).not.toHaveProperty('set-cookie');
       });
@@ -79,7 +80,7 @@ describe('integration testing', () => {
     await request(app)
       .post('/')
       .expect(async ({ headers }) => {
-        const sessions = await prisma.session.findMany();
+        const sessions = await prisma.otherSession.findMany();
         expect(sessions).toHaveLength(1);
         expect(headers).toHaveProperty('set-cookie');
       });
@@ -94,7 +95,7 @@ describe('integration testing', () => {
       .delete('/')
       .set('Cookie', sessionCookie)
       .expect(async () => {
-        const sessions = await prisma.session.findMany();
+        const sessions = await prisma.otherSession.findMany();
         expect(sessions).toHaveLength(0);
       });
   });
@@ -104,7 +105,7 @@ describe('integration testing', () => {
       .post('/')
       .then(async ({ headers }) => headers['set-cookie']);
 
-    const [newSession] = await prisma.session.findMany();
+    const [newSession] = await prisma.otherSession.findMany();
     expect(JSON.parse(newSession.data)).toStrictEqual(
       expect.objectContaining({
         data: 'TESTING',
@@ -113,7 +114,7 @@ describe('integration testing', () => {
 
     await request(app).put('/').set('Cookie', sessionCookie);
 
-    const [updatedSession] = await prisma.session.findMany();
+    const [updatedSession] = await prisma.otherSession.findMany();
     expect(JSON.parse(updatedSession.data)).toStrictEqual(
       expect.objectContaining({
         data: 'UPDATED',
