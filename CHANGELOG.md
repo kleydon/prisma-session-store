@@ -1,3 +1,15 @@
+# [3.1.0](https://github.com/kleydon/prisma-session-store/compare/v3.0.1...v3.1.0) (2021-08-16)
+
+
+### Bug Fixes
+
+* sessionModelName jsdoc typo ([c0fe3ec](https://github.com/kleydon/prisma-session-store/commit/c0fe3ec043733d46fdea50719b9ad1849a51ed76))
+
+
+### Features
+
+* custom model name ([d9273ff](https://github.com/kleydon/prisma-session-store/commit/d9273ff96a9fad8dc43a9fd1ebcb318783275632))
+
 ## [3.0.1](https://github.com/kleydon/prisma-session-store/compare/v3.0.0...v3.0.1) (2021-02-16)
 
 
