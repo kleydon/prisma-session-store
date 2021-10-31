@@ -1,6 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "lib": ["es2019"],
     "outDir": "./dist/spec"
   },
   "include": ["**/*.spec.ts", "**/mocks/**/*.ts", "**/*.d.ts", "**/*.ts"]
