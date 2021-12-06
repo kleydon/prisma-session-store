@@ -1,3 +1,10 @@
+## [3.1.2](https://github.com/kleydon/prisma-session-store/compare/v3.1.1...v3.1.2) (2021-12-06)
+
+### Bug Fixes
+
+- removed accidental package-lock.json file ([4156faf](https://github.com/kleydon/prisma-session-store/commit/4156faf78cc261a873a137067a11389ad038ef03))
+- synced prisma client and prisma dependency versions ([178f0d7](https://github.com/kleydon/prisma-session-store/commit/178f0d7531bbca8a44d75d8417e2182e348478fb))
+
 ## [3.1.1](https://github.com/kleydon/prisma-session-store/compare/v3.1.0...v3.1.1) (2021-12-06)
 
 ### Bug Fixes
