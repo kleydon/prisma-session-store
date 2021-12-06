@@ -226,7 +226,7 @@ Three new options were added apart from the work that was already done by [memor
 
 ## Author
 
-Krispin Leydon ([kleydon](https://github.com/kleydon)), based heavily on [memorystore](https://github.com/roccomuso/memorystore), by [roccomuso](https://github.com/roccomuso), refactored to TypeScript by [wSedlacek](https://github.com/wSedlacek)
+Krispin Leydon ([kleydon](https://github.com/kleydon)), originally based on [memorystore](https://github.com/roccomuso/memorystore), by [roccomuso](https://github.com/roccomuso), refactored to TypeScript (with extensive improvement) by [wSedlacek](https://github.com/wSedlacek)
 
 ## License
 
