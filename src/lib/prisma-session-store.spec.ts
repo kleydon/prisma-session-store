@@ -517,13 +517,13 @@ describe('PrismaSessionStore', () => {
     describe('prisma', () => {
       it('should fail gracefully with invalid prisma objects', async () => {
         const invalidPrisma = new PrismaSessionStore(
-          (undefined as unknown) as IPrisma,
+          undefined as unknown as IPrisma,
           {
             logger: false,
           }
         );
         const invalidPrismaKeys = new PrismaSessionStore(
-          ({} as unknown) as IPrisma,
+          {} as unknown as IPrisma,
           {
             logger: false,
           }
@@ -784,7 +784,7 @@ describe('PrismaSessionStore', () => {
       });
 
       it('should throw if ttl is not a function or number', async () => {
-        const [store] = freshStore({ ttl: ('12' as unknown) as number });
+        const [store] = freshStore({ ttl: '12' as unknown as number });
 
         await expect(store.set('sid-0', {})).rejects.toBeTruthy();
       });
