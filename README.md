@@ -130,7 +130,7 @@ If you are using something other then `prisma` then you will need to manage the 
 
 #### MySQL
 
-If you are using MySQL as your datasource provider you may also need change the type of your data column to be TEXT:
+If you are using MySQL as your datasource provider you may also need change the type of your data column to TEXT:
 
 ```sql
 USE your-database
