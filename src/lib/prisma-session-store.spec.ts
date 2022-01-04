@@ -11,7 +11,7 @@ declare module 'express-session' {
   interface SessionData {
     sample?: boolean;
     unrealizable?: string;
-    //Optional user id / name
+    // Optional user id / name
     // * Non-unique; a given user may have multiple sessions - for multiple browsers, devices, etc.
     // * Auto-populated by set(), if the session argument passed to set() includes a uid property.
     // * Required to delete all sessions for a given user via destroyUsersSessions().
@@ -201,9 +201,9 @@ describe('PrismaSessionStore', () => {
     it('should delete all sessions for user associated with session sid-0 (user id: uid-0)', async () => {
       const [store, { findUniqueMock, deleteManyMock }] = freshStore();
 
-      const sid0: string = 'sid-0';
-      const uid0: string = 'uid-0';
-      const session0Data: string = `{"sample": false, "uid": "${uid0}}"}`;
+      const sid0 = 'sid-0';
+      const uid0 = 'uid-0';
+      const session0Data = `{"sample": false, "uid": "${uid0}}"}`;
 
       findUniqueMock.mockResolvedValue({
         sid: sid0,
@@ -226,7 +226,7 @@ describe('PrismaSessionStore', () => {
     it('should fail gracefully when attempting to delete non-existent item', async () => {
       const [store, { findUniqueMock }] = freshStore();
 
-      findUniqueMock.mockRejectedValue('Could not delete items'); //When attempting to delete non-existent item, fails on finding it
+      findUniqueMock.mockResolvedValue(null);
 
       const deletePromise = store.destroyUsersSessions('sid-0');
 
@@ -236,12 +236,12 @@ describe('PrismaSessionStore', () => {
     it('should delete an array of sids', async () => {
       const [store, { deleteManyMock, findUniqueMock }] = freshStore();
 
-      const sid0: string = 'sid-0';
-      const uid0: string = 'uid-0';
-      const session0Data: string = `{"sample": false, "uid": "${uid0}}"}`;
+      const sid0 = 'sid-0';
+      const uid0 = 'uid-0';
+      const session0Data = `{"sample": false, "uid": "${uid0}}"}`;
 
-      //XXX: This value should actually change, with each array value in the
-      //destroyUsersSessions([]) call below... How to accomplish this with Jest?
+      // XXX: This value should actually change, with each array value in the
+      // destroyUsersSessions([]) call below... How to accomplish this with Jest?
       findUniqueMock.mockResolvedValue({
         sid: sid0,
         uid: uid0,
@@ -250,22 +250,22 @@ describe('PrismaSessionStore', () => {
 
       await store.destroyUsersSessions(['sid-0', 'sid-1', 'sid-2']);
 
-      expect(deleteManyMock).toHaveBeenCalledTimes(1); //XXX Depending on the user ids associated with the array above, this value could change.
+      expect(deleteManyMock).toHaveBeenCalledTimes(1); // XXX Depending on the user ids associated with the array above, this value could change.
     });
 
     it('should pass errors to callback', async () => {
-      const [store, { findUniqueMock, deleteManyMock }] = freshStore();
+      const [store, { findUniqueMock }] = freshStore();
 
-      //Session provided doesn't exist
+      // Session provided doesn't exist
       const callback1 = jest.fn();
       findUniqueMock.mockRejectedValue('Session doesnt exist error');
       await store.destroyUsersSessions('sid-0', callback1);
       expect(callback1).toHaveBeenCalledWith('Session doesnt exist error');
 
-      //Session provided doesn't have an associated user id
+      // Session provided doesn't have an associated user id
       const callback2 = jest.fn();
-      const sid0: string = 'sid-0';
-      const session0Data: string = `{"sample": false}`;
+      const sid0 = 'sid-0';
+      const session0Data = `{"sample": false}`;
       findUniqueMock.mockResolvedValue({
         sid: sid0,
         data: session0Data,
