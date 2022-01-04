@@ -198,8 +198,10 @@ describe('PrismaSessionStore', () => {
   });
 
   describe('.destroyUsersSessions()', () => {
-    it('should delete all sessions for user associated with session sid-0 (user id: uid-0)', async () => {
+    it('should delete sessions for user associated with session sid-0 (user id: uid-0)', async () => {
       const [store, { findUniqueMock, deleteManyMock }] = freshStore();
+
+      const callback = jest.fn();
 
       const sid0 = 'sid-0';
       const uid0 = 'uid-0';
@@ -211,7 +213,7 @@ describe('PrismaSessionStore', () => {
         data: session0Data,
       });
 
-      await store.destroyUsersSessions(sid0);
+      await store.destroyUsersSessions(sid0, callback);
 
       expect(findUniqueMock).toHaveBeenCalledWith(
         expect.objectContaining({ where: { sid: sid0 } })
