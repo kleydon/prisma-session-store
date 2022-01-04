@@ -456,15 +456,13 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
     }
 
     if (existingSession !== null) {
-      const updateData: Partial<ICreatePrismaSession> = baseData;
       await this.prisma[this.sessionModelName].update({
-        data: updateData,
+        data: baseData,
         where: { sid },
       });
     } else {
-      const createData: ICreatePrismaSession = { ...baseData };
       await this.prisma[this.sessionModelName].create({
-        data: { ...createData, data: sessionString },
+        data: { ...baseData, data: sessionString },
       });
     }
 
