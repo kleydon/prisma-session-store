@@ -16,8 +16,6 @@ import { createExpiration, defer, getTTL } from './utils';
 declare module 'express-session' {
   // tslint:disable-next-line: naming-convention
   interface SessionData {
-    sample?: boolean;
-    unrealizable?: string;
     uid?: string; //Optional user id / name
     // * Non-unique; a given user may have multiple sessions - for multiple browsers, devices, etc.
     // * Auto-populated by set(), if the session argument passed to set() includes a uid property.
