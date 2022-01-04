@@ -1,7 +1,7 @@
 export interface IPrismaSession {
   id: string; //record id
   sid: string; //session id (which can be configured to be same as record id, using dbRecordIdIsSessionId option)
-  uid?: string | null; //Optional user id / name
+  uid?: string | null; // Optional user id / name
   // * Non-unique; a given user may have multiple sessions - for multiple browsers, devices, etc.
   // * Auto-populated by set(), if the session argument passed to set() includes a uid property.
   // * Required to delete all sessions for a given user via destroyUsersSessions().

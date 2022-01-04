@@ -4,10 +4,10 @@ import { dedent } from 'ts-dedent';
 import type { PartialDeep } from 'type-fest';
 
 import type {
+  ICreatePrismaSession,
   IOptions,
   IPrisma,
   ISessions,
-  ICreatePrismaSession,
 } from '../@types';
 
 import { ManagedLogger } from './logger';
@@ -16,7 +16,7 @@ import { createExpiration, defer, getTTL } from './utils';
 declare module 'express-session' {
   // tslint:disable-next-line: naming-convention
   interface SessionData {
-    uid?: string; //Optional user id / name
+    uid?: string; // Optional user id / name
     // * Non-unique; a given user may have multiple sessions - for multiple browsers, devices, etc.
     // * Auto-populated by set(), if the session argument passed to set() includes a uid property.
     // * Required to delete all sessions for a given user via destroyUsersSessions().
@@ -237,10 +237,13 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
       this.logger.warn(
         `Attempt to destroy non-existent session:${String(sid)} ${String(e)}`
       );
-      if (callback) return defer(callback, e);
+      if (callback) defer(callback, e);
+      return;
     }
 
-    if (callback) defer(callback);
+    if (callback) {
+      defer(callback);
+    }
   };
 
   /**
@@ -298,7 +301,8 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
           sid
         )}: ${String(e)}`
       );
-      if (callback) return defer(callback, e);
+      if (callback) defer(callback, e);
+      return;
     }
 
     if (callback) defer(callback);
