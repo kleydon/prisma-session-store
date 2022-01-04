@@ -11,6 +11,11 @@ declare module 'express-session' {
   interface SessionData {
     sample?: boolean;
     unrealizable?: string;
+    uid?: string; //Optional user id / name
+    // * Non-unique; a given user may have multiple sessions - for multiple browsers, devices, etc.
+    // * Auto-populated by set(), if the session argument passed to set() includes a uid property.
+    // * Required to delete all sessions for a given user via destroyUsersSessions().
+    // * Enables functions within this package, such as destroyUsersSessions(), to make user-based queries.
     data?: string;
   }
 }
@@ -191,6 +196,86 @@ describe('PrismaSessionStore', () => {
     });
   });
 
+  describe('.destroyUsersSessions()', () => {
+    it('should delete all sessions for user associated with session sid-0 (user id: uid-0)', async () => {
+      const [store, { findUniqueMock, deleteManyMock }] = freshStore();
+
+      const sid0: string = 'sid-0';
+      const uid0: string = 'uid-0';
+      const session0Data: string = `{"sample": false, "uid": "${uid0}}"}`;
+
+      findUniqueMock.mockResolvedValue({
+        sid: sid0,
+        uid: uid0,
+        data: session0Data,
+      });
+
+      await store.destroyUsersSessions(sid0);
+
+      expect(findUniqueMock).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { sid: sid0 } })
+      );
+      expect(deleteManyMock).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { uid: uid0 } })
+      );
+
+      expect(deleteManyMock).toBeCalledTimes(1);
+    });
+
+    it('should fail gracefully when attempting to delete non-existent item', async () => {
+      const [store, { findUniqueMock }] = freshStore();
+
+      findUniqueMock.mockRejectedValue('Could not delete items'); //When attempting to delete non-existent item, fails on finding it
+
+      const deletePromise = store.destroyUsersSessions('sid-0');
+
+      await expect(deletePromise).resolves.toBe(undefined);
+    });
+
+    it('should delete an array of sids', async () => {
+      const [store, { deleteManyMock, findUniqueMock }] = freshStore();
+
+      const sid0: string = 'sid-0';
+      const uid0: string = 'uid-0';
+      const session0Data: string = `{"sample": false, "uid": "${uid0}}"}`;
+
+      //XXX: This value should actually change, with each array value in the
+      //destroyUsersSessions([]) call below... How to accomplish this with Jest?
+      findUniqueMock.mockResolvedValue({
+        sid: sid0,
+        uid: uid0,
+        data: session0Data,
+      });
+
+      await store.destroyUsersSessions(['sid-0', 'sid-1', 'sid-2']);
+
+      expect(deleteManyMock).toHaveBeenCalledTimes(1); //XXX Depending on the user ids associated with the array above, this value could change.
+    });
+
+    it('should pass errors to callback', async () => {
+      const [store, { findUniqueMock, deleteManyMock }] = freshStore();
+
+      //Session provided doesn't exist
+      const callback1 = jest.fn();
+      findUniqueMock.mockRejectedValue('Session doesnt exist error');
+      await store.destroyUsersSessions('sid-0', callback1);
+      expect(callback1).toHaveBeenCalledWith('Session doesnt exist error');
+
+      //Session provided doesn't have an associated user id
+      const callback2 = jest.fn();
+      const sid0: string = 'sid-0';
+      const session0Data: string = `{"sample": false}`;
+      findUniqueMock.mockResolvedValue({
+        sid: sid0,
+        data: session0Data,
+      });
+      await store.destroyUsersSessions('sid-0', callback2);
+      expect(callback2).toHaveBeenCalledWith(
+        new Error('No user id found for provided session id: sid-0')
+      );
+    });
+  });
+
   describe('.touch()', () => {
     it('should update a given entry', async () => {
       const [store, { updateMock, findUniqueMock }] = freshStore();
@@ -263,6 +348,20 @@ describe('PrismaSessionStore', () => {
           data: '{"cookie":{},"sample":true}',
           id: 'sid-0',
           sid: 'sid-0',
+        }),
+      });
+    });
+
+    it('should create a new session if none exists, when optional uid arg is supplied', async () => {
+      const [store, { createMock }] = freshStore();
+
+      await store.set('sid-0', { cookie: {}, sample: true, uid: 'uid-0' });
+      expect(createMock).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          data: '{"cookie":{},"sample":true,"uid":"uid-0"}',
+          id: 'sid-0',
+          sid: 'sid-0',
+          uid: 'uid-0',
         }),
       });
     });

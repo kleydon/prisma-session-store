@@ -3,7 +3,12 @@ import { SessionData, Store } from 'express-session';
 import { dedent } from 'ts-dedent';
 import type { PartialDeep } from 'type-fest';
 
-import type { IOptions, IPrisma, ISessions } from '../@types';
+import type {
+  IOptions,
+  IPrisma,
+  ISessions,
+  ICreatePrismaSession,
+} from '../@types';
 
 import { ManagedLogger } from './logger';
 import { createExpiration, defer, getTTL } from './utils';
@@ -220,7 +225,68 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
       this.logger.warn(
         `Attempt to destroy non-existent session:${String(sid)} ${String(e)}`
       );
-      if (callback) defer(callback, e);
+      if (callback) return defer(callback, e);
+    }
+
+    if (callback) defer(callback);
+  };
+
+  /**
+   * Destroy all session(s) for the user(s) associated with the provided `sid`(s)'.
+   * Prerequisite:
+   *   All sessions in the store have been created using set() with a
+   *  `session` argument containing the `uid` (user id / name) property.
+   *
+   * @param sid a single or multiple id(s) to remove data for
+   * @param callback a callback notifying that the session(s) have
+   * been destroyed or that an error occurred
+   */
+  public readonly destroyUsersSessions = async (
+    sid: string | string[],
+    callback?: (err?: unknown) => void
+  ) => {
+    if (!(await this.validateConnection())) return callback?.();
+
+    try {
+      //Find all unique user ids for the sessions specified by the sid argument
+      const sids = Array.isArray(sid) ? sid : [sid];
+      const uids: { [key: string]: any } = {};
+      for (const id of sids) {
+        const s = await this.prisma[this.sessionModelName].findUnique({
+          where: { sid: id },
+        });
+        if (!s) {
+          const errMsg: string = `No session found for provided session id: ${String(
+            sid
+          )}`;
+          this.logger.warn(errMsg);
+          throw Error(errMsg);
+        } else {
+          const uid = s.uid;
+          if (!uid) {
+            const errMsg: string = `No user id found for provided session id: ${String(
+              sid
+            )}`;
+            this.logger.warn(errMsg);
+            throw Error(errMsg);
+          } else if (!uids[uid]) {
+            uids[uid] = true;
+          }
+        }
+      }
+      //Delete all sessions corresponding to the found user ids
+      await Promise.all(
+        Object.keys(uids).map(async (uid) =>
+          this.prisma[this.sessionModelName].deleteMany({ where: { uid } })
+        )
+      );
+    } catch (e: unknown) {
+      this.logger.warn(
+        `Error while destroying user's sessions for session id ${String(
+          sid
+        )}: ${String(e)}`
+      );
+      if (callback) return defer(callback, e);
     }
 
     if (callback) defer(callback);
@@ -361,6 +427,8 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
       rounding: this.options.roundTTL,
     });
 
+    const uid: string | undefined = session.uid; //user id
+
     let sessionString;
     try {
       sessionString = this.serializer.stringify(session);
@@ -377,21 +445,26 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
       })
       .catch(() => null);
 
-    const data = {
+    let baseData: ICreatePrismaSession = {
       sid,
       expiresAt,
       data: sessionString,
       id: this.dbRecordIdIsSessionId ? sid : this.dbRecordIdFunction(sid),
     };
+    if (uid) {
+      baseData = { ...baseData, uid };
+    }
 
     if (existingSession !== null) {
+      const updateData: Partial<ICreatePrismaSession> = baseData;
       await this.prisma[this.sessionModelName].update({
-        data,
+        data: updateData,
         where: { sid },
       });
     } else {
+      const createData: ICreatePrismaSession = { ...baseData };
       await this.prisma[this.sessionModelName].create({
-        data: { ...data, data: sessionString },
+        data: { ...createData, data: sessionString },
       });
     }
 
