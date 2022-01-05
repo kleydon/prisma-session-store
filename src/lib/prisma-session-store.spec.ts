@@ -638,6 +638,7 @@ describe('PrismaSessionStore', () => {
         await invalidPrisma.set('', {});
         await invalidPrisma.touch('', {});
         await invalidPrisma.destroy('');
+        await invalidPrisma.destroyUsersSessions('');
         await invalidPrisma.all();
         await invalidPrisma.ids();
         await invalidPrisma.length();
@@ -648,6 +649,7 @@ describe('PrismaSessionStore', () => {
         await invalidPrismaKeys.set('', {});
         await invalidPrismaKeys.touch('', {});
         await invalidPrismaKeys.destroy('');
+        await invalidPrismaKeys.destroyUsersSessions('');
         await invalidPrismaKeys.all();
         await invalidPrismaKeys.ids();
         await invalidPrismaKeys.length();
@@ -659,6 +661,7 @@ describe('PrismaSessionStore', () => {
         await invalidPrisma.set('', {}, callback);
         await invalidPrisma.touch('', {}, callback);
         await invalidPrisma.destroy('', callback);
+        await invalidPrisma.destroyUsersSessions('', callback);
         await invalidPrisma.all(callback);
         await invalidPrisma.ids(callback);
         await invalidPrisma.length(callback);
@@ -668,12 +671,13 @@ describe('PrismaSessionStore', () => {
         await invalidPrismaKeys.set('', {}, callback);
         await invalidPrismaKeys.touch('', {}, callback);
         await invalidPrismaKeys.destroy('', callback);
+        await invalidPrismaKeys.destroyUsersSessions('', callback);
         await invalidPrismaKeys.all(callback);
         await invalidPrismaKeys.ids(callback);
         await invalidPrismaKeys.length(callback);
         await invalidPrismaKeys.clear(callback);
 
-        expect(callback).toHaveBeenCalledTimes(16);
+        expect(callback).toHaveBeenCalledTimes(18);
       });
     });
 

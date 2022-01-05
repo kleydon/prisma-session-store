@@ -223,6 +223,7 @@ Three new options were added apart from the work that was already done by [memor
 - `startInterval()` and `stopInterval()` methods to start/clear the automatic check for expired.
 - `prune()` that you can use to manually remove only the expired entries from the store.
 - `shutdown()` that can be used to stop any intervals and disconnect from prisma.
+- `destroyUsersSessions(sid, callback)` to destroy all sessions for user associated with `sid` (presuming sessions have been created with `data` containing a `uid` user id/name property).
 
 ## Author
 
