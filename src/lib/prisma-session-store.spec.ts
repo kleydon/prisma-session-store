@@ -13,6 +13,7 @@ declare module 'express-session' {
     unrealizable?: string;
     /**
      * Optional user id / name
+     *
      * - Non-unique; a given user may have multiple sessions - for multiple browsers, devices, etc.
      * - Auto-populated by set(), if the session argument passed to set() includes a uid property.
      * - Required to delete all sessions for a given user via destroyUsersSessions().
