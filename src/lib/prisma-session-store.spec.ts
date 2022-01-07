@@ -11,11 +11,13 @@ declare module 'express-session' {
   interface SessionData {
     sample?: boolean;
     unrealizable?: string;
-    // Optional user id / name
-    // * Non-unique; a given user may have multiple sessions - for multiple browsers, devices, etc.
-    // * Auto-populated by set(), if the session argument passed to set() includes a uid property.
-    // * Required to delete all sessions for a given user via destroyUsersSessions().
-    // * Enables functions within this package, such as destroyUsersSessions(), to make user-based queries.
+    /**
+     * Optional user id / name
+     * - Non-unique; a given user may have multiple sessions - for multiple browsers, devices, etc.
+     * - Auto-populated by set(), if the session argument passed to set() includes a uid property.
+     * - Required to delete all sessions for a given user via destroyUsersSessions().
+     * - Enables functions within this package, such as destroyUsersSessions(), to make user-based queries.
+     */
     uid?: string;
     data?: string;
   }
