@@ -281,7 +281,7 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
           throw Error(errMsg);
         }
         const uid = s.uid;
-        if (typeof uid !== 'string') {
+        if (typeof uid !== 'string' || uid === '') {
           const errMsg = `No user id found for provided session id: ${String(
             sid
           )}`;
