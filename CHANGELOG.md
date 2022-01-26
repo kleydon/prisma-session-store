@@ -1,3 +1,9 @@
+## [3.1.3](https://github.com/kleydon/prisma-session-store/compare/v3.1.2...v3.1.3) (2022-01-26)
+
+### Bug Fixes
+
+- double defer in destroy function ([d34595e](https://github.com/kleydon/prisma-session-store/commit/d34595e083a397466271d9d8f88b44bf35d5a6d3))
+
 ## [3.1.2](https://github.com/kleydon/prisma-session-store/compare/v3.1.1...v3.1.2) (2021-12-06)
 
 ### Bug Fixes
