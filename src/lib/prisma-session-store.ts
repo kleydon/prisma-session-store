@@ -221,6 +221,8 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
         `Attempt to destroy non-existent session:${String(sid)} ${String(e)}`
       );
       if (callback) defer(callback, e);
+
+      return;
     }
 
     if (callback) defer(callback);
