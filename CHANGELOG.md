@@ -1,3 +1,9 @@
+## [3.1.5](https://github.com/kleydon/prisma-session-store/compare/v3.1.4...v3.1.5) (2022-05-10)
+
+### Bug Fixes
+
+- addresses interval errors ([ddc1884](https://github.com/kleydon/prisma-session-store/commit/ddc1884facfa5d88cd2bf1fdfafef5bc14ab23b4))
+
 ## [3.1.4](https://github.com/kleydon/prisma-session-store/compare/v3.1.3...v3.1.4) (2022-05-10)
 
 ### Bug Fixes
