@@ -220,7 +220,7 @@ Three new options were added apart from the work that was already done by [memor
 
 `prisma-session-store` implements all the **required**, **recommended** and **optional** methods of the [express-session](https://github.com/expressjs/session#session-store-implementation) store, plus a few more:
 
-- `startInterval(onIntervalError?: (err: unknown) => void)` and `stopInterval()` methods to start/clear the automatic check for expired. (The optional onError() callback that fires if ever the interval function throws an error.)
+- `startInterval(onIntervalError?: (err: unknown) => void)` and `stopInterval()` methods to start/clear the automatic check for expired. (The optional `onError()` callback that fires if/when the interval's `prune()` function throws an error.)
 - `prune()` that you can use to manually remove only the expired entries from the store.
 - `shutdown()` that can be used to stop any intervals and disconnect from prisma.
 
