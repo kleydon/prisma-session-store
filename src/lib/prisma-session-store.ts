@@ -418,13 +418,16 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
   /**
    * Start an interval to prune expired sessions
    */
-  public startInterval(): void {
+  public startInterval(onIntervalError?: (err: unknown) => void): void {
     const ms = this.options.checkPeriod;
-
     if (typeof ms === 'number' && ms !== 0) {
       this.stopInterval();
-      this.checkInterval = setInterval(() => {
-        this.prune();
+      this.checkInterval = setInterval(async () => {
+        try {
+          await this.prune();
+        } catch (err: unknown) {
+          if (onIntervalError !== undefined) onIntervalError(err);
+        }
       }, Math.floor(ms));
     }
   }
