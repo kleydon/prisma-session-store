@@ -1,3 +1,9 @@
+## [3.1.4](https://github.com/kleydon/prisma-session-store/compare/v3.1.3...v3.1.4) (2022-05-10)
+
+### Bug Fixes
+
+- prevent crash in set ([3c774eb](https://github.com/kleydon/prisma-session-store/commit/3c774eb5537ad70f17b273b4cc9e3cd4cdfd5e6f)), closes [#82](https://github.com/kleydon/prisma-session-store/issues/82)
+
 ## [3.1.3](https://github.com/kleydon/prisma-session-store/compare/v3.1.2...v3.1.3) (2022-01-26)
 
 ### Bug Fixes
