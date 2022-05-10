@@ -386,15 +386,22 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
       id: this.dbRecordIdIsSessionId ? sid : this.dbRecordIdFunction(sid),
     };
 
-    if (existingSession !== null) {
-      await this.prisma[this.sessionModelName].update({
-        data,
-        where: { sid },
-      });
-    } else {
-      await this.prisma[this.sessionModelName].create({
-        data: { ...data, data: sessionString },
-      });
+    try {
+      if (existingSession !== null) {
+        await this.prisma[this.sessionModelName].update({
+          data,
+          where: { sid },
+        });
+      } else {
+        await this.prisma[this.sessionModelName].create({
+          data: { ...data, data: sessionString },
+        });
+      }
+    } catch (e: unknown) {
+      this.logger.error(`set(): ${String(e)}`);
+      if (callback) defer(callback, e);
+
+      return;
     }
 
     if (callback) defer(callback);
