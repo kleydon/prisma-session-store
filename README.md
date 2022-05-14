@@ -16,6 +16,7 @@ Based on: [memorystore](https://github.com/roccomuso/memorystore), by [roccomuso
 
 const expressSession = require('express-session');
 const { PrismaSessionStore } = require('@quixo3/prisma-session-store');
+const { PrismaClient } = require('@prisma/client');
 
 ...
 
@@ -28,7 +29,7 @@ app.use(
     resave: true,
     saveUninitialized: true,
     store: new PrismaSessionStore(
-      prisma,
+      new PrismaClient(),
       {
         checkPeriod: 2 * 60 * 1000,  //ms
         dbRecordIdIsSessionId: true,
@@ -47,7 +48,7 @@ app.use(
 ```ts
 import expressSession from 'express-session';
 import { PrismaSessionStore } from '@quixo3/prisma-session-store';
-
+import  { PrismaClient } from '@prisma/client';
 ...
 
 app.use(
@@ -59,7 +60,7 @@ app.use(
     resave: true,
     saveUninitialized: true,
     store: new PrismaSessionStore(
-      prisma,
+      new PrismaClient(),
       {
         checkPeriod: 2 * 60 * 1000,  //ms
         dbRecordIdIsSessionId: true,
