@@ -1,6 +1,6 @@
 # prisma-session-store
 
-An [express](https://github.com/expressjs) session store implementation, for the [Prisma (2) Framework](https://github.com/prisma).
+An [express](https://github.com/expressjs) session store implementation for the [Prisma ORM](https://github.com/prisma).
 
 Want the flexibility and scalability of a Prisma GraphQL data layer, along with the optionality and maturity of the Express ecosystem - but concerned about [JWT](https://jwt.io) or [Paseto](https://paseto.io) tokens for session management (see cautions posted [here](https://paragonie.com/blog/2017/03/jwt-json-web-tokens-is-bad-standard-that-everyone-should-avoid), [here](http://cryto.net/%7Ejoepie91/blog/2016/06/19/stop-using-jwt-for-sessions-part-2-why-your-solution-doesnt-work/), [here](https://techblog.bozho.net/using-jwt-sessions/), [here](https://news.ycombinator.com/item?id=17877332), and [here](https://developer.okta.com/blog/2017/08/17/why-jwts-suck-as-session-tokens))?
 
