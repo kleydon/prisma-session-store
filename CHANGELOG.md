@@ -1,3 +1,9 @@
+## [3.1.6](https://github.com/kleydon/prisma-session-store/compare/v3.1.5...v3.1.6) (2022-06-20)
+
+### Bug Fixes
+
+- fixed deletion in prune function ([698a25b](https://github.com/kleydon/prisma-session-store/commit/698a25b42508f12eabfd74811fecdcfc29734c58))
+
 ## [3.1.5](https://github.com/kleydon/prisma-session-store/compare/v3.1.4...v3.1.5) (2022-05-10)
 
 ### Bug Fixes
