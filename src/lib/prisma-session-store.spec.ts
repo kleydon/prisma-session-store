@@ -358,20 +358,28 @@ describe('PrismaSessionStore', () => {
 
   describe('.prune()', () => {
     it('should prune old sessions', async () => {
-      const [store, { findManyMock, deleteMock }] = freshStore({
+      const [store, { findManyMock, findUniqueMock, deleteMock }] = freshStore({
         roundTTL: 100,
       });
 
-      findManyMock.mockResolvedValueOnce([
-        { sid: 'sid-0', expiresAt: createExpiration(-1, { rounding: 100 }) },
-        { sid: 'sid-1', expiresAt: createExpiration(500, { rounding: 100 }) },
-      ]);
+      const s1 = {
+        sid: 'sid-0',
+        expiresAt: createExpiration(-1, { rounding: 100 }),
+      };
+
+      const s2 = {
+        sid: 'sid-1',
+        expiresAt: createExpiration(500, { rounding: 100 }),
+      };
+
+      findManyMock.mockResolvedValueOnce([s1, s2]);
+      findUniqueMock.mockResolvedValue(s1);
       deleteMock.mockResolvedValue(undefined);
 
       await store.prune();
 
-      expect(deleteMock).toHaveBeenCalledWith({ where: { sid: 'sid-0' } });
-      expect(deleteMock).not.toHaveBeenCalledWith({ where: { sid: 'sid-1' } });
+      expect(deleteMock).toHaveBeenCalledWith({ where: { sid: s1.sid } });
+      expect(deleteMock).not.toHaveBeenCalledWith({ where: { sid: s2.sid } });
     });
   });
 
@@ -725,15 +733,21 @@ describe('PrismaSessionStore', () => {
 
     describe('checkPeriod', () => {
       it('should enable automatic prune for expired entries', async () => {
-        const [store, { findManyMock, deleteMock }] = freshStore({
-          checkPeriod: 10,
-          roundTTL: 100,
-        });
+        const [store, { findManyMock, deleteMock, findUniqueMock }] =
+          freshStore({
+            checkPeriod: 10,
+            roundTTL: 100,
+          });
+        const expiresAt = createExpiration(-1, { rounding: 100 });
+        const s1 = {
+          expiresAt,
+          data: '',
+          id: '1',
+          sid: '1',
+        };
         deleteMock.mockResolvedValue(undefined);
-        findManyMock.mockResolvedValue([
-          { expiresAt: createExpiration(-1, { rounding: 100 }) },
-        ]);
-
+        findUniqueMock.mockResolvedValue(s1);
+        findManyMock.mockResolvedValue([s1]);
         await sleep(10);
         expect(deleteMock).toHaveBeenCalled();
 
