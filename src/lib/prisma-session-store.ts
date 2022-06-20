@@ -316,6 +316,7 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
   /**
    * Remove only expired entries from the store
    */
+
   public readonly prune = async () => {
     if (!(await this.validateConnection())) return;
 
@@ -330,15 +331,19 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
     });
 
     for (const session of sessions) {
+      const p = this.prisma[this.sessionModelName];
       const now = new Date();
       const remainingSec = (session.expiresAt.valueOf() - now.valueOf()) / 1000;
       this.logger.log(`session:${session.sid} expires in ${remainingSec}sec`);
-
       if (now.valueOf() >= session.expiresAt.valueOf()) {
-        this.logger.log(`Deleting session with sid: ${session.sid}`);
-        await this.prisma[this.sessionModelName].delete({
-          where: { sid: session.sid },
-        });
+        const sid = session.sid;
+        this.logger.log(`Deleting session with sid: ${sid}`);
+        const foundSession = await p.findUnique({ where: { sid } });
+        if (foundSession !== null) {
+          await p.delete({ where: { sid } });
+        } else {
+          this.logger.warn(`Session record with sid: ${sid} not found.`);
+        }
       }
     }
   };
