@@ -388,7 +388,6 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
       sid,
       expiresAt,
       data: sessionString,
-      id: this.dbRecordIdIsSessionId ? sid : this.dbRecordIdFunction(sid),
     };
 
     try {
@@ -399,7 +398,11 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
         });
       } else {
         await this.prisma[this.sessionModelName].create({
-          data: { ...data, data: sessionString },
+          data: {
+            ...data,
+            id: this.dbRecordIdIsSessionId ? sid : this.dbRecordIdFunction(sid),
+            data: sessionString,
+          },
         });
       }
     } catch (e: unknown) {
