@@ -1,3 +1,9 @@
+## [3.1.7](https://github.com/kleydon/prisma-session-store/compare/v3.1.6...v3.1.7) (2022-06-25)
+
+### Bug Fixes
+
+- remove immutable id field from query for MongoDB ([ba39bc1](https://github.com/kleydon/prisma-session-store/commit/ba39bc1ed2c763eb5b99b43c1aece0098e63cb2b)), closes [#83](https://github.com/kleydon/prisma-session-store/issues/83)
+
 ## [3.1.6](https://github.com/kleydon/prisma-session-store/compare/v3.1.5...v3.1.6) (2022-06-20)
 
 ### Bug Fixes
