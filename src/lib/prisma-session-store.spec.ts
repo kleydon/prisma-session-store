@@ -279,7 +279,6 @@ describe('PrismaSessionStore', () => {
       expect(updateMock).toHaveBeenCalledWith({
         data: expect.objectContaining({
           data: '{"cookie":{},"sample":true}',
-          id: 'sid-0',
           sid: 'sid-0',
         }),
         where: {
