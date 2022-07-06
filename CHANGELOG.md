@@ -1,3 +1,12 @@
+## [3.1.8](https://github.com/kleydon/prisma-session-store/compare/v3.1.7...v3.1.8) (2022-07-06)
+
+### Bug Fixes
+
+- adjusted test coverage ([ff610c6](https://github.com/kleydon/prisma-session-store/commit/ff610c690ba2454e9ddc9a43945cc372e66b4713))
+- remove unnecessary warning from prune ([08703fc](https://github.com/kleydon/prisma-session-store/commit/08703fc3358221459ef0059903e5242f51b26824))
+- removed worrying log statement ([076d1ed](https://github.com/kleydon/prisma-session-store/commit/076d1ed7a321c33d0924b1e8aaf6f89441599801))
+- updated tests ([90cd5db](https://github.com/kleydon/prisma-session-store/commit/90cd5db44b7fc2a325bd20cf9fed9642436eefca))
+
 ## [3.1.7](https://github.com/kleydon/prisma-session-store/compare/v3.1.6...v3.1.7) (2022-06-25)
 
 ### Bug Fixes
