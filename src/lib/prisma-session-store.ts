@@ -212,14 +212,12 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
 
     try {
       if (Array.isArray(sid)) {
-        await Promise.all(sid.map(async (s) => this.destroy(s, callback)));
+        await Promise.all(sid.map(async (id) => this.destroy(id, callback)));
       } else {
         await this.prisma[this.sessionModelName].delete({ where: { sid } });
       }
     } catch (e: unknown) {
-      this.logger.warn(
-        `Attempt to destroy non-existent session:${String(sid)} ${String(e)}`
-      );
+      // NOTE: Attempts to delete non-existent sessions land here
       if (callback) defer(callback, e);
 
       return;
