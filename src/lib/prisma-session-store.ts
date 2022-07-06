@@ -337,11 +337,7 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
         const sid = session.sid;
         this.logger.log(`Deleting session with sid: ${sid}`);
         const foundSession = await p.findUnique({ where: { sid } });
-        if (foundSession !== null) {
-          await p.delete({ where: { sid } });
-        } else {
-          this.logger.warn(`Session record with sid: ${sid} not found.`);
-        }
+        if (foundSession !== null) await p.delete({ where: { sid } });
       }
     }
   };
