@@ -1,5 +1,5 @@
 export interface IPrismaSession {
-  data: string | null;
+  data: string | JsonValue | null;
   expiresAt: Date;
   id: string;
   sid: string;
