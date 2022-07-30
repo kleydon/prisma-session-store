@@ -1,3 +1,5 @@
+import { JsonValue } from "type-fest";
+
 export interface IPrismaSession {
   data: string | JsonValue | null;
   expiresAt: Date;
