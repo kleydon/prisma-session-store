@@ -153,11 +153,11 @@ describe('PrismaSessionStore', () => {
 
   describe('.destroy()', () => {
     it('should delete the first item', async () => {
-      const [store, { deleteMock }] = freshStore();
+      const [store, { deleteManyMock }] = freshStore();
 
       await store.destroy('sid-0');
 
-      expect(deleteMock).toHaveBeenCalledWith(
+      expect(deleteManyMock).toHaveBeenCalledWith(
         expect.objectContaining({ where: { sid: 'sid-0' } })
       );
     });
@@ -172,18 +172,18 @@ describe('PrismaSessionStore', () => {
     });
 
     it('should delete an array of sids', async () => {
-      const [store, { deleteMock }] = freshStore();
+      const [store, { deleteManyMock }] = freshStore();
 
       await store.destroy(['sid-0', 'sid-1', 'sid-2']);
 
-      expect(deleteMock).toHaveBeenCalledTimes(3);
+      expect(deleteManyMock).toHaveBeenCalledTimes(3);
     });
 
     it('should pass errors to callback', async () => {
-      const [store, { deleteMock }] = freshStore();
+      const [store, { deleteManyMock }] = freshStore();
       const callback = jest.fn();
 
-      deleteMock.mockRejectedValue('some error');
+      deleteManyMock.mockRejectedValue('some error');
 
       await store.destroy('sid-0', callback);
 

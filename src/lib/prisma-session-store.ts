@@ -214,7 +214,10 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
       if (Array.isArray(sid)) {
         await Promise.all(sid.map(async (id) => this.destroy(id, callback)));
       } else {
-        await this.prisma[this.sessionModelName].delete({ where: { sid } });
+        // Calling deleteMany to prevent an error from being thrown. Fix for issue 91
+        await this.prisma[this.sessionModelName].deleteMany({
+          where: { sid },
+        });
       }
     } catch (e: unknown) {
       // NOTE: Attempts to delete non-existent sessions land here
