@@ -214,7 +214,12 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
       if (Array.isArray(sid)) {
         await Promise.all(sid.map(async (id) => this.destroy(id, callback)));
       } else {
-        await this.prisma[this.sessionModelName].delete({ where: { sid } });
+        // const session = await this.prisma[this.sessionModelName].findUnique({ where: { sid } });
+        // if(session) {
+        await this.prisma[this.sessionModelName].deleteMany({
+          where: { sid },
+        });
+        // }
       }
     } catch (e: unknown) {
       // NOTE: Attempts to delete non-existent sessions land here
