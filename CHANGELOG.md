@@ -1,3 +1,9 @@
+## [3.1.9](https://github.com/kleydon/prisma-session-store/compare/v3.1.8...v3.1.9) (2022-08-21)
+
+### Bug Fixes
+
+- issue 91 by changing 'delete' to 'deleteMany' and updating tests ([b9473b8](https://github.com/kleydon/prisma-session-store/commit/b9473b8c9db17f98e9c5c8285fcc5bc9920e95d0))
+
 ## [3.1.8](https://github.com/kleydon/prisma-session-store/compare/v3.1.7...v3.1.8) (2022-07-06)
 
 ### Bug Fixes
