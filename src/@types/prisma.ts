@@ -1,7 +1,7 @@
-import { JsonValue } from "type-fest";
+import { JsonObject } from 'type-fest';
 
 export interface IPrismaSession {
-  data: string | JsonValue | null;
+  data: string | JsonObject | null;
   expiresAt: Date;
   id: string;
   sid: string;

@@ -97,7 +97,7 @@ From your **prisma.schema** file, include a session model:
 model Session {
   id        String   @id
   sid       String   @unique
-  data      Json     @db.Json
+  data      Json     @db.Json  // NOTE: Up until v3.1.9, data's type was defined as String
   expiresAt   DateTime
 }
 ```

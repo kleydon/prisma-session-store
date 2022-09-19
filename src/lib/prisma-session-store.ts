@@ -3,7 +3,13 @@ import { SessionData, Store } from 'express-session';
 import { dedent } from 'ts-dedent';
 import type { PartialDeep } from 'type-fest';
 
-import type { IOptions, IPrisma, ISessions } from '../@types';
+import type {
+  IOptions,
+  IPrisma,
+  IPrismaSession,
+  ISessions,
+  Optional,
+} from '../@types';
 
 import { ManagedLogger } from './logger';
 import { createExpiration, defer, getTTL } from './utils';
@@ -145,6 +151,21 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
   }
 
   /**
+   * Coerces session-data json-string/obj/null to either:
+   *    * SessionData (with cookie field made optional), or
+   *    * {}
+   */
+  private coerceSessionData(
+    data: IPrismaSession['data']
+  ): Optional<SessionData, 'cookie'> | {} {
+    if (data === null) return {};
+    if (typeof data === 'string')
+      return this.serializer.parse(data) as SessionData;
+
+    return data as Optional<SessionData, 'cookie'>;
+  }
+
+  /**
    * Fetch all sessions
    *
    * @param callback a callback providing all session data
@@ -163,7 +184,7 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
       const result = sessions
         .map(
           ({ sid, data }) =>
-            [sid, this.serializer.parse(data ?? '{}') as SessionData] as const
+            [sid, this.coerceSessionData(data) as SessionData] as const
         )
         .reduce<ISessions>(
           (prev, [sid, data]) => ({ ...prev, [sid]: data }),
@@ -249,7 +270,8 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
     if (session === null) return callback?.();
 
     try {
-      const result = this.serializer.parse(session.data ?? '{}') as SessionData;
+      const result = this.coerceSessionData(session.data);
+
       if (callback) defer(callback, undefined, result);
 
       return result;
@@ -473,7 +495,7 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
 
       if (existingSession !== null) {
         const existingSessionData = {
-          ...this.serializer.parse(existingSession.data ?? '{}'),
+          ...(this.coerceSessionData(existingSession.data) ?? {}),
           cookie: session.cookie,
         };
 
