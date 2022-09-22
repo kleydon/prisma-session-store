@@ -142,6 +142,10 @@ Prisma `String` properties are mapped to `VARCHAR(191)` by default. Session data
 
 If you are using a version of Prisma that supports [migrating with native types](https://github.com/prisma/prisma/issues/4330) you can use a type annotation in your `schema.prisma` file instead of manually modifying your data column.
 
+## Upgrading from versions following `3.1.9`
+
+Concurrent calls to `set()` and concurrent calls to `touch()` having the same session id are now disallowed by default, as a work-around to address [issue 88](https://github.com/kleydon/prisma-session-store/issues/88). (This issue may surface when a browser is loading multiple resources for a page in parallel). The issue may be limited to SQLite, but hasn't been isolated; `express-session` or `prisma` may be implicated. If necessary, you can prevent the new default behavior, and re-enable concurrent calls having the same session id, by setting one or both of: `enableConcurrentSetInvocationsForSameSessionID`, `enableConcurrentTouchInvocationsForSameSessionID` to `true`; see below.
+
 ## Migrating from versions following `2.0.0`
 
 Following version `2.0.0`, the `Session` `expires` field was renamed to `expiresAt` to match Prisma's naming convention for date fields.
@@ -208,7 +212,7 @@ CUID will be used instead.
 
 - `sessionModelName` By default, the session table is called `sessions` and the associated model is `session`, but you can provide a custom model name. This should be the camelCase version of the name.
 
-Three new options were added apart from the work that was already done by [memorystore](https://github.com/roccomuso/memorystore), two of them relate to logging and allow you to inject your own logger object giving you flexibility to log outputs to something like NestJS or whenever you would like, even saving them to disk if that's what you want. And the third is used for testing to round the TTL so that it can be compared do another generated ttl during the assertion.
+Five new options were added, apart from the work that was already done by [memorystore](https://github.com/roccomuso/memorystore), two of them relate to logging and allow you to inject your own logger object giving you flexibility to log outputs to something like NestJS or whenever you would like, even saving them to disk if that's what you want. And the third is used for testing to round the TTL so that it can be compared do another generated ttl during the assertion.
 
 - `logger` Where logs should be outputted to, by default `console`. If set to `false` then logging will be disabled
 
@@ -216,6 +220,8 @@ Three new options were added apart from the work that was already done by [memor
 
 - `roundTTL` the amount of milliseconds to round down the TTL so that it will match another TTL generated later.
   Mostly used for test stability.
+
+- `enableConcurrentSetInvocationsForSameSessionID` and `enableConcurrentTouchInvocationsForSameSessionID`. Since v3.1.9, concurrent calls to set() and touch() for the same session id have been disabled, as a work-around for an issue that users have been experiencing (see [Issue 88](https://github.com/kleydon/prisma-session-store/issues/88)). This issue may occur when a browser is loading multiple resources for a page in parallel. The issue may be limited to use of SQLite, but has not yet been isolated; `express-session` or `prisma` may be implicated. If necessary, you can prevent this default behavior and re-enable concurrent calls having the same session id by setting one or both of these variables to `true`.
 
 ## Methods
 

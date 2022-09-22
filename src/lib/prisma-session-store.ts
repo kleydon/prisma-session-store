@@ -60,7 +60,35 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
     super();
     this.startInterval();
     this.connect();
+    this.isSetting = new Map<string, boolean>();
+    this.isTouching = new Map<string, boolean>();
   }
+
+  // Work-around, re: concurrrent calls to touch() and concurrent calls to set()
+  // having the same session id:
+  // Some users have experienced issues when concurrent calls are made
+  // to touch() or set(), using the same session id.
+  // This can occur, for instance, when a browser is loading
+  // a page with multiple resources in parallel.
+  // It is not yet clear whether this is an issue within:
+  //   * SQLite (see https://stackoverflow.com/questions/4060772/sqlite-concurrent-access),
+  //   * express-session
+  //   * Prisma
+  //   * Possibly a combination.
+  //
+  // Until there is a long-term solution, this library offers a work-around,
+  // wherein only a single invocation of set() (or touch()) for a given session id
+  // may be executed at a time.
+  // If necessary, this workaround may be disabled by setting the following
+  // PrismaSessionStore options to true:
+  //   * enableConcurrentSetInvocationsForSameSessionID
+  //   * enableConcurrentTouchInvocationsForSameSessionID
+  //
+  // Use of the variables isTouching and isSetting (below)
+  // enables this work-around, and all references to these
+  // may be removed once the work-around is no longer needed.
+  private readonly isTouching: Map<string, boolean>;
+  private readonly isSetting: Map<string, boolean>;
 
   /**
    * @description The currently active interval created with `startInterval()` and removed with `stopInterval()`
@@ -136,8 +164,8 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
     ).catch(() => {
       this.disable();
       this.stopInterval();
-      this.logger.error(dedent`Could not connect to Sessions model in Prisma.
-      Please make sure that prisma is setup correctly and that your migrations are current.
+      this.logger.error(dedent`Could not connect to 'Session' model in Prisma.
+      Please make sure that prisma is setup correctly, that 'Session' model exists, and that your migrations are current.
       For more information check out https://github.com/kleydon/prisma-session-store`);
     });
 
@@ -358,18 +386,58 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
     session: PartialDeep<SessionData>,
     callback?: (err?: unknown) => void
   ) => {
+    // If a previous invocation of this function using the same sid
+    // is in-process, and we're not permitting such concurrent calls
+    // (see work-around note above), ensure that the call-in-process
+    // completes, before subsequent invocations using the same sid
+    // can fully execute.
+    if (
+      this.options.enableConcurrentSetInvocationsForSameSessionID !== true &&
+      this.isSetting.get(sid)
+    ) {
+      this.logger.warn(
+        `Concurrent calls to set() with the same session id are not currently permitted by default. (See README, and https://github.com/kleydon/prisma-session-store/issues/88). To over-ride this behaviour, set PrismaSessionStore's 'enableConcurrentSetInvocationsForSameSessionID' to true.`
+      );
+
+      return callback?.();
+    }
+    // If we don't have a valid connection, we can't continue;
+    // return early.
     if (!(await this.validateConnection())) return callback?.();
 
-    const ttl = getTTL(this.options, session, sid);
-    const expiresAt = createExpiration(ttl, {
-      rounding: this.options.roundTTL,
-    });
+    // Set a flag to indicate that a set() operation is in progress
+    // for this sid. **NOTE**: Be sure this flag is cleared by
+    // any/all paths out of this function!
+    this.isSetting.set(sid, true);
+
+    // Note: Currently, there are two separate try / catch blocks
+    // below to satisfy tests. Ultimately, it may be
+    // simpler/preferable to combine these blocks, and
+    // re-think the tests.
+
+    let ttl;
+    let expiresAt;
+    try {
+      ttl = getTTL(this.options, session, sid);
+      expiresAt = createExpiration(ttl, {
+        rounding: this.options.roundTTL,
+      });
+    } catch (e: unknown) {
+      this.logger.error(`set(): ${String(e)}`);
+      // Clear flag, to indicate that set() operation
+      // is no longer in progress for this sid.
+      this.isSetting.set(sid, false);
+      throw e as Error; // Re-throwing to satisfy a test. (Does this make sense?)
+    }
 
     let sessionString;
     try {
       sessionString = this.serializer.stringify(session);
     } catch (e: unknown) {
       this.logger.error(`set(): ${String(e)}`);
+      // Clear flag, to indicate that set() operation
+      // is no longer in progress for this sid.
+      this.isSetting.set(sid, false);
       if (callback) defer(callback, e);
 
       return;
@@ -404,10 +472,17 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
       }
     } catch (e: unknown) {
       this.logger.error(`set(): ${String(e)}`);
+      // Clear flag, to indicate that set() operation
+      // is no longer in progress for this sid.
+      this.isSetting.set(sid, false);
       if (callback) defer(callback, e);
 
       return;
     }
+
+    // Clear flag, to indicate that set() operation
+    // is no longer in progress for this sid.
+    this.isSetting.set(sid, false);
 
     if (callback) defer(callback);
   };
@@ -457,14 +532,36 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
     session: PartialDeep<SessionData>,
     callback?: (err?: unknown) => void
   ) => {
+    // If a previous invocation of this function using the same sid
+    // is in-process, and we're not permitting such concurrent calls
+    // (see work-around note above), ensure that the call-in-process
+    // completes, before subsequent invocations using the same sid
+    // can fully execute.
+    if (
+      this.options.enableConcurrentTouchInvocationsForSameSessionID !== true &&
+      this.isTouching.get(sid)
+    ) {
+      this.logger.warn(
+        `Concurrent calls to touch() with the same session id are not currently permitted by default. (See README, and https://github.com/kleydon/prisma-session-store/issues/88). To over-ride this behaviour, set PrismaSessionStore's 'enableConcurrentTouchInvocationsForSameSessionID' to true.`
+      );
+
+      return callback?.();
+    }
+    // If we don't have a valid connection, we can't continue;
+    // return early
     if (!(await this.validateConnection())) return callback?.();
 
-    const ttl = getTTL(this.options, session, sid);
-    const expiresAt = createExpiration(ttl, {
-      rounding: this.options.roundTTL,
-    });
+    // Set a flag to indicate a touch() operation is in progress
+    // for this sid. **NOTE**: Be sure this flag is cleared by
+    // any/all paths out of this function!
+    this.isTouching.set(sid, true);
 
     try {
+      const ttl = getTTL(this.options, session, sid);
+      const expiresAt = createExpiration(ttl, {
+        rounding: this.options.roundTTL,
+      });
+
       const existingSession = await this.prisma[
         this.sessionModelName
       ].findUnique({
@@ -486,11 +583,15 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
         });
       }
 
-      // *** If there is no found session, for some reason, should it be recreated from sess *** ?
+      // *** If there is no found session, for some reason, should it be recreated *** ?
       if (callback) defer(callback);
     } catch (e: unknown) {
       this.logger.error(`touch(): ${String(e)}`);
       if (callback) defer(callback, e);
+    } finally {
+      // Clear flag, to indicate that touch() operation
+      // is no longer in progress for this sid.
+      this.isTouching.delete(sid);
     }
   };
 }
