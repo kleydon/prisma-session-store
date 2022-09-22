@@ -70,15 +70,15 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
   // to touch() or set(), using the same session id.
   // This can occur, for instance, when a browser is loading
   // a page with multiple resources in parallel.
-  // It is not yet clear whether this is an issue within:
-  //   * SQLite (see https://stackoverflow.com/questions/4060772/sqlite-concurrent-access),
-  //   * express-session
-  //   * Prisma
-  //   * Possibly a combination.
+  // The issue may simply be an issue with SQLite
+  // (see https://stackoverflow.com/questions/4060772/sqlite-concurrent-access),
+  // but it hasn't yet been isolated. It is possible that express-session or prisma
+  // are alternately / additionally implicated.
   //
   // Until there is a long-term solution, this library offers a work-around,
   // wherein only a single invocation of set() (or touch()) for a given session id
   // may be executed at a time.
+  //
   // If necessary, this workaround may be disabled by setting the following
   // PrismaSessionStore options to true:
   //   * enableConcurrentSetInvocationsForSameSessionID
