@@ -1,3 +1,9 @@
+## [3.1.10](https://github.com/kleydon/prisma-session-store/compare/v3.1.9...v3.1.10) (2022-09-24)
+
+### Bug Fixes
+
+- work-around fix for issue 88 ([9de0b72](https://github.com/kleydon/prisma-session-store/commit/9de0b727974bcec8130ebaa3bd507656ba1ece73))
+
 ## [3.1.9](https://github.com/kleydon/prisma-session-store/compare/v3.1.8...v3.1.9) (2022-08-21)
 
 ### Bug Fixes
