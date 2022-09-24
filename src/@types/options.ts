@@ -98,6 +98,32 @@ export interface IOptions<M extends string = 'session'> {
   sessionModelName?: Exclude<M, `$${string}`>;
 
   /**
+   * enableConcurrentSetInvocationsForSameSessionID: boolean;
+   *
+   * By default, concurrent calls to set() for the same session ID
+   * are NOT permitted, due to an unresolved issue with either
+   * SQLite, Prisma, or both; see README, and:
+   *   https://github.com/kleydon/prisma-session-store/issues/88
+   *
+   * To enable concurrent calls to set() for the same session ID,
+   * set this variable to true.
+   */
+  enableConcurrentSetInvocationsForSameSessionID?: boolean;
+
+  /**
+   * enableConcurrentTouchInvocationsForSameSessionID: boolean;
+   *
+   * By default, concurrent calls to set() for the same session ID
+   * are NOT permitted, due to an unresolved issue with either
+   * SQLite, Prisma, or both; see README, and:
+   *   https://github.com/kleydon/prisma-session-store/issues/88
+   *
+   * To enable concurrent calls to set() for the same session ID,
+   * set this variable to true.
+   */
+  enableConcurrentTouchInvocationsForSameSessionID?: boolean;
+
+  /**
    * A function to generate the Prisma Record ID for a given session ID
    *
    * Note: If undefined and dbRecordIdIsSessionId is also undefined then a random
