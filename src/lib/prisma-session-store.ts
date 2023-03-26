@@ -1,4 +1,4 @@
-import cuid from 'cuid';
+import cuid2 from '@paralleldrive/cuid2';
 import { SessionData, Store } from 'express-session';
 import { dedent } from 'ts-dedent';
 import type { PartialDeep } from 'type-fest';
@@ -145,7 +145,7 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
    * CUID will be used instead.
    */
   private readonly dbRecordIdFunction = (sid: string) =>
-    this.options.dbRecordIdFunction?.(sid) ?? cuid();
+    this.options.dbRecordIdFunction?.(sid) ?? cuid2.createId();
 
   /**
    * Disables store, used when prisma cannot be connected to
