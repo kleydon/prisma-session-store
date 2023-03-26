@@ -1,3 +1,9 @@
+## [3.1.11](https://github.com/kleydon/prisma-session-store/compare/v3.1.10...v3.1.11) (2023-03-26)
+
+### Bug Fixes
+
+- replace cuid with cuid2 ([2b40695](https://github.com/kleydon/prisma-session-store/commit/2b4069513b96de294e1084fd3dc7951675e91e63)), closes [/github.com/paralleldrive/cuid#status-deprecated-due-to-security-use-cuid2](https://github.com//github.com/paralleldrive/cuid/issues/status-deprecated-due-to-security-use-cuid2)
+
 ## [3.1.10](https://github.com/kleydon/prisma-session-store/compare/v3.1.9...v3.1.10) (2022-09-24)
 
 ### Bug Fixes
