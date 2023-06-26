@@ -1,3 +1,9 @@
+## [3.1.12](https://github.com/kleydon/prisma-session-store/compare/v3.1.11...v3.1.12) (2023-06-26)
+
+### Bug Fixes
+
+- recover from disconnected state ([11375ca](https://github.com/kleydon/prisma-session-store/commit/11375cad776c0dba429a858b37b000693998598e))
+
 ## [3.1.11](https://github.com/kleydon/prisma-session-store/compare/v3.1.10...v3.1.11) (2023-03-26)
 
 ### Bug Fixes
