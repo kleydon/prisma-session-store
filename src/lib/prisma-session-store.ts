@@ -155,19 +155,31 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
   }
 
   /**
+   * Enables store, used when prisma can be connected to
+   */
+  private enable(): void {
+    this.invalidConnection = false;
+  }
+
+  /**
    * Returns if the connect is valid or not, logging an error if it is not.
    */
   private async validateConnection(): Promise<boolean> {
     await (
       this.prisma?.$connect?.() ??
       Promise.reject(new Error('Could not connect'))
-    ).catch(() => {
-      this.disable();
-      this.stopInterval();
-      this.logger.error(dedent`Could not connect to 'Session' model in Prisma.
+    )
+      .then(() => {
+        this.enable();
+        this.startInterval();
+      })
+      .catch(() => {
+        this.disable();
+        this.stopInterval();
+        this.logger.error(dedent`Could not connect to 'Session' model in Prisma.
       Please make sure that prisma is setup correctly, that 'Session' model exists, and that your migrations are current.
       For more information check out https://github.com/kleydon/prisma-session-store`);
-    });
+      });
 
     return !this.invalidConnection;
   }
@@ -499,6 +511,8 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
    * Start an interval to prune expired sessions
    */
   public startInterval(onIntervalError?: (err: unknown) => void): void {
+    if (this.checkInterval) return;
+
     const ms = this.options.checkPeriod;
     if (typeof ms === 'number' && ms !== 0) {
       this.stopInterval();
