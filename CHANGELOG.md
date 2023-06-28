@@ -1,3 +1,11 @@
+## [3.1.13](https://github.com/kleydon/prisma-session-store/compare/v3.1.12...v3.1.13) (2023-06-28)
+
+### Bug Fixes
+
+- adjusted a test ([7ef28a8](https://github.com/kleydon/prisma-session-store/commit/7ef28a8cfbbe042d860d7b8b6141fefb28aacf21))
+- dont get expired session ([de9304d](https://github.com/kleydon/prisma-session-store/commit/de9304de9f44239c688f2daba2657604f24537e1)), closes [#115](https://github.com/kleydon/prisma-session-store/issues/115)
+- fixed test case ([15e8381](https://github.com/kleydon/prisma-session-store/commit/15e8381ef1823ca1e8628782d57127005b4fcf8f))
+
 ## [3.1.12](https://github.com/kleydon/prisma-session-store/compare/v3.1.11...v3.1.12) (2023-06-26)
 
 ### Bug Fixes
