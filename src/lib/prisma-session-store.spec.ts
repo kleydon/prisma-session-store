@@ -156,7 +156,12 @@ describe('PrismaSessionStore', () => {
       await store.get('sid-0', callback);
 
       expect(callback).toHaveBeenCalledWith(
-        new SyntaxError(`Expected property name or '}' in JSON at position 2`)
+        new SyntaxError(
+          `Expected property name or '}' in JSON at position 2`
+        ) ||
+          new SyntaxError(
+            `SyntaxError: Unexpected token i in JSON at position 2`
+          )
       );
     });
 
