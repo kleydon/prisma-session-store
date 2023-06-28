@@ -1,7 +1,9 @@
 {
-  "extends": "tslint-config-suiyobi",
+  "extends": "tslint:recommended",
   "rules": {
     "no-big-function": false,
-    "max-file-line-count": false
+    "max-file-line-count": false,
+    "ban-types": false,
+    "variable-name": false
   }
 }

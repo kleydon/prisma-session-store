@@ -6573,23 +6573,6 @@ tslint-clean-code@latest:
     memoize-decorator "^1.0.2"
     tsutils "2.7.1"
 
-tslint-config-suiyobi@^0.4.8:
-  version "0.4.8"
-  resolved "https://registry.yarnpkg.com/tslint-config-suiyobi/-/tslint-config-suiyobi-0.4.8.tgz#7c0cddc1658b329bc694d729538ec422ac405679"
-  integrity sha512-Jfr0K6vuIJBvk3wWwc9MT6OaQT+zgZ580SWwQ/4qK6Y8aC/x09B6SE4ECxLc+fL8UhXwBP4HLbou9SVz56IB+A==
-  dependencies:
-    "@angular-devkit/schematics" "^10.1.0"
-    doctrine "^3.0.0"
-    immutable "^4.0.0-rc.12"
-    rxjs-tslint-rules latest
-    tslint-clean-code latest
-    tslint-etc latest
-    tslint-plugin-decorator-member-ordering "^0.0.1"
-    tslint-plugin-prettier latest
-    tsutils "^3.17.1"
-    tsutils-etc "^1.3.1"
-    typescript-tslint-plugin latest
-
 tslint-etc@latest:
   version "1.13.10"
   resolved "https://registry.yarnpkg.com/tslint-etc/-/tslint-etc-1.13.10.tgz#5700b0d83f0a243cb7d32b0b7ec2662cb5998bce"
