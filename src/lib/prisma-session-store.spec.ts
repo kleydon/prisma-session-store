@@ -121,6 +121,23 @@ describe('PrismaSessionStore', () => {
       expect(callback).toHaveBeenCalledWith();
     });
 
+    it('should not get items for an expired session', async () => {
+      const [store, { findUniqueMock, deleteMock }] = freshStore();
+      const callback = jest.fn();
+      const s1 = {
+        sid: 'sid-0',
+        expiresAt: createExpiration(-1, { rounding: 100 }),
+      };
+      findUniqueMock.mockResolvedValue(s1);
+      deleteMock.mockResolvedValue(undefined);
+
+      await expect(store.get('sid-0', callback)).resolves.toStrictEqual(
+        undefined
+      );
+      expect(deleteMock).toHaveBeenCalledWith({ where: { sid: s1.sid } });
+      expect(callback).toHaveBeenCalledWith();
+    });
+
     it('should resolve to a promise', async () => {
       const [store, { findUniqueMock }] = freshStore();
 
@@ -139,7 +156,7 @@ describe('PrismaSessionStore', () => {
       await store.get('sid-0', callback);
 
       expect(callback).toHaveBeenCalledWith(
-        new SyntaxError('Unexpected token i in JSON at position 2')
+        new SyntaxError(`Expected property name or '}' in JSON at position 2`)
       );
     });
 

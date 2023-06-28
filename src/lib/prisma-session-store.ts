@@ -280,7 +280,9 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
     callback?: (err?: unknown, val?: SessionData) => void
   ) => {
     if (!(await this.validateConnection())) return callback?.();
-    const session = await this.prisma[this.sessionModelName]
+    const p = this.prisma[this.sessionModelName];
+
+    const session = await p
       .findUnique({
         where: { sid },
       })
@@ -289,6 +291,17 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
     if (session === null) return callback?.();
 
     try {
+      // If session has has expired (allowing for missing 'expiresAt' and 'sid' fields)
+      if (
+        session.sid &&
+        session.expiresAt &&
+        new Date().valueOf() >= session.expiresAt.valueOf()
+      ) {
+        this.logger.log(`Session with sid: ${sid} expired; deleting.`);
+        await p.delete({ where: { sid } });
+        return callback?.();
+      }
+
       const result = this.serializer.parse(session.data ?? '{}') as SessionData;
       if (callback) defer(callback, undefined, result);
 
