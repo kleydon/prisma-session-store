@@ -97,7 +97,7 @@ From your **prisma.schema** file, include a session model:
 model Session {
   id        String   @id
   sid       String   @unique
-  data      String
+  data      String   @db.MediumText
   expiresAt   DateTime
 }
 ```
