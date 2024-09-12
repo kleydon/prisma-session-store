@@ -91,7 +91,7 @@ Install `@quixo3/prisma-session-store` (and `express-session`, if not already in
 
 #### Model
 
-From your **prisma.schema** file, include a session model:
+From your **schema.prisma** file, include a session model:
 
 ```prisma
 model Session {
