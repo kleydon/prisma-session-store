@@ -7,6 +7,7 @@ import type { IOptions, IPrisma, ISessions } from '../@types';
 
 import { ManagedLogger } from './logger';
 import { createExpiration, defer, getTTL } from './utils';
+import { ISerializer } from '../@types/serializer';
 
 /**
  * An `express-session` store used in the `express-session` options
@@ -53,15 +54,27 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
    * );
    * ```
    */
+
   constructor(
     private readonly prisma: IPrisma<M>,
     private readonly options: IOptions<M>
   ) {
     super();
-    this.startInterval();
-    this.connect();
+
     this.isSetting = new Map<string, boolean>();
     this.isTouching = new Map<string, boolean>();
+
+    this.dbRecordIdIsSessionId = this.options.dbRecordIdIsSessionId;
+    this.logger = new ManagedLogger(
+      this.options.logger ?? console,
+      this.options.loggerLevel ?? ['error']
+    );
+    this.serializer = this.options.serializer ?? JSON;
+    this.sessionModelName =
+      this.options.sessionModelName ?? ('session' as Exclude<M, `$${string}`>);
+
+    this.startInterval();
+    this.connect();
   }
 
   // Work-around, re: concurrrent calls to touch() and concurrent calls to set()
@@ -101,7 +114,7 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
    * Note: If undefined and dbRecordIdFunction is also undefined then a random
    * CUID will be used instead.
    */
-  private readonly dbRecordIdIsSessionId = this.options.dbRecordIdIsSessionId;
+  private readonly dbRecordIdIsSessionId: boolean | undefined;
 
   /**
    * @description whether or not the prisma connection has been tested to be invalid
@@ -111,24 +124,20 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
   /**
    * @description A object that handles logging to a given logger based on the logging level
    */
-  private readonly logger = new ManagedLogger(
-    this.options.logger ?? console,
-    this.options.loggerLevel ?? ['error']
-  );
+  private readonly logger: ManagedLogger;
 
   /**
    * @description Some serializer that will transform objects into strings
    * and vice versa
    */
-  private readonly serializer = this.options.serializer ?? JSON;
+  private readonly serializer: ISerializer | JSON;
 
   /**
    * @description The name of the sessions model
    *
    * Defaults to `session` if `sessionModelName` in options is undefined
    */
-  private readonly sessionModelName: Exclude<M, `$${string}`> =
-    this.options.sessionModelName ?? ('session' as Exclude<M, `$${string}`>);
+  private readonly sessionModelName: Exclude<M, `$${string}`>;
 
   /**
    * Attempts to connect to Prisma, displaying a pretty error if the connection is not possible.

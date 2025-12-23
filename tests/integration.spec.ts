@@ -1,6 +1,7 @@
 // tslint:disable: no-duplicate-string
-
-import { PrismaClient } from '@prisma/client';
+import 'dotenv/config';
+import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
+import { PrismaClient } from '../prisma/generated/client';
 import { execSync } from 'child_process';
 import express from 'express';
 import session from 'express-session';
@@ -19,11 +20,13 @@ declare module 'express-session' {
 
 describe('integration testing', () => {
   const app = express();
-  const prisma = new PrismaClient();
+  const connectionString = `${process.env.DATABASE_URL}`;
+  const adapter = new PrismaBetterSqlite3({ url: connectionString });
+  const prisma = new PrismaClient({ adapter });
 
   beforeAll(() => {
     if (!existsSync(join(__dirname, '../prisma/dev.db')))
-      execSync('prisma migrate dev --preview-feature');
+      execSync('prisma migrate dev --name init --preview-feature');
 
     app.use(
       session({
@@ -106,7 +109,7 @@ describe('integration testing', () => {
       .then(async ({ headers }) => headers['set-cookie']);
 
     const [newSession] = await prisma.otherSession.findMany();
-    expect(JSON.parse(newSession.data)).toStrictEqual(
+    expect(JSON.parse(newSession.data!)).toStrictEqual(
       expect.objectContaining({
         data: 'TESTING',
       })
@@ -115,7 +118,7 @@ describe('integration testing', () => {
     await request(app).put('/').set('Cookie', sessionCookie);
 
     const [updatedSession] = await prisma.otherSession.findMany();
-    expect(JSON.parse(updatedSession.data)).toStrictEqual(
+    expect(JSON.parse(updatedSession.data!)).toStrictEqual(
       expect.objectContaining({
         data: 'UPDATED',
       })

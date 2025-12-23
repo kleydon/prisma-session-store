@@ -2,7 +2,12 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "lib": ["es2019"],
-    "outDir": "./dist/spec"
+    "outDir": "./dist/spec",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "target": "esnext",
+    "strict": true,
+    "esModuleInterop": true
   },
   "include": ["**/*.spec.ts", "**/mocks/**/*.ts", "**/*.d.ts", "**/*.ts"]
 }
