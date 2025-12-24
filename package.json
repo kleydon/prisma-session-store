@@ -46,7 +46,7 @@
   "dependencies": {
     "@paralleldrive/cuid2": "^2.2.0",
     "ts-dedent": "^2.2.0",
-    "type-fest": "^2.5.2"
+    "type-fest": "^5.3.1"
   },
   "peerDependencies": {
     "@prisma/client": ">=2.16.1",
