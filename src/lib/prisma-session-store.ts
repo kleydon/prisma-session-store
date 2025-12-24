@@ -461,7 +461,7 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
       // Clear flag, to indicate that set() operation
       // is no longer in progress for this sid.
       this.isSetting.set(sid, false);
-      throw e as Error; // Re-throwing to satisfy a test. (Does this make sense?)
+      throw e; // Re-throwing to satisfy a test. (Does this make sense?)
     }
 
     let sessionString;
@@ -605,10 +605,10 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
       });
 
       if (existingSession !== null) {
-        const existingSessionData = {
+        const existingSessionData: object = {
           ...this.serializer.parse(existingSession.data ?? '{}'),
           cookie: session.cookie,
-        };
+        } as object;
 
         await this.prisma[this.sessionModelName].update({
           where: { sid: existingSession.sid },

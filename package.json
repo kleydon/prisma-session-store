@@ -33,7 +33,7 @@
   ],
   "scripts": {
     "build": "tsc --build tsconfig.lib.json",
-    "lint": "tslint -c tslint.json 'src/**/*.ts' --project tsconfig.lib.json",
+    "lint": "npx eslint -c eslint.config.js --ext .ts 'src/**/*.ts' --ignore-pattern \"**/*.spec.ts\" --ignore-pattern  \"**/mocks/**/*.ts\"",
     "test": "jest --coverage",
     "clean": "tsc --build --clean | rm -r ./dist | rm -r ./node_modules | rm -r ./prisma/generated | rm -r ./prisma/migrations | rm -r ./prisma/dev.db",
     "prepare": "npx prisma generate && husky install",
@@ -65,9 +65,14 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^25.0.3",
     "@types/supertest": "^2.0.11",
+    "@typescript-eslint/eslint-plugin": "^8.50.1",
+    "@typescript-eslint/parser": "^8.50.1",
     "commitizen": "^4.2.4",
     "cz-conventional-changelog": "3.3.0",
     "dotenv": "^17.2.3",
+    "eslint": "^9.39.2",
+    "eslint-plugin-jsdoc": "^61.5.0",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
     "express": "^4.17.1",
     "express-session": "^1.17.2",
     "husky": "^7.0.4",
@@ -78,7 +83,6 @@
     "semantic-release": "^19.0.3",
     "supertest": "^6.1.6",
     "ts-jest": "^29.4.6",
-    "tslint": "^6.1.3",
     "typescript": "^5.4.0"
   },
   "config": {
