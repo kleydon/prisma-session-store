@@ -35,6 +35,7 @@
     "build": "tsc --build tsconfig.lib.json",
     "lint": "tslint -c tslint.json 'src/**/*.ts' --project tsconfig.lib.json",
     "test": "jest --coverage",
+    "clean": "tsc --build --clean | rm -r ./dist | rm -r ./node_modules | rm -r ./prisma/generated | rm -r ./prisma/migrations | rm -r ./prisma/dev.db",
     "prepare": "npx prisma generate && husky install",
     "prepublish": "npm run build",
     "commit": "cz"

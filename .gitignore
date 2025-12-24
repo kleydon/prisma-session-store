@@ -6,7 +6,7 @@
 
 # .ENV
 # +++++++++++++++++++++++++++++++++++++++
-.env*
+# .env*  # Commented out so that test database string is accessible
 # ---------------------------------------
 
 
@@ -69,3 +69,4 @@ dist
 coverage
 prisma/dev.db
 prisma/migrations/**
+prisma/generated/**
