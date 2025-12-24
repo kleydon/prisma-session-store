@@ -5,7 +5,7 @@
     "rootDir": "src",
     "tsBuildInfoFile": "./.build-cache/lib"
   },
-  "exclude": ["**/*.spec.ts", "**/mocks/**/*.ts"],
   "include": ["src/**/*.ts"],
+  "exclude": ["**/*.spec.ts", "**/mocks/**/*.ts"],
   "files": ["src/index.ts"]
 }

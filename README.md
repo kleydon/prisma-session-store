@@ -8,7 +8,85 @@ Want the flexibility and scalability of a Prisma GraphQL data layer, along with 
 
 Based on: [memorystore](https://github.com/roccomuso/memorystore), by [roccomuso](https://github.com/roccomuso)
 
-## Usage
+## Usage, Prisma 7+
+
+### TypeScript
+
+```ts
+import expressSession from 'express-session';
+import "dotenv/config";
+import { PrismaPg } from "@prisma/adapter-pg";  // For other db adapters, see Prisma docs
+import { PrismaClient } from "../../generated/prisma/client";
+import { PrismaSessionStore } from '@quixo3/prisma-session-store';
+
+ // DATABASE_URL defined in env file included in prisma.config.js; see Prisma docs
+const connectionString = `${process.env.DATABASE_URL}`;
+const adapter = new PrismaPg({ connectionString });
+const prisma = new PrismaClient({ adapter });
+...
+
+app.use(
+  expressSession({
+    cookie: {
+     maxAge: 7 * 24 * 60 * 60 * 1000 // ms
+    },
+    secret: 'a santa at nasa',
+    resave: true,
+    saveUninitialized: true,
+    store: new PrismaSessionStore(
+      prisma,
+      {
+        checkPeriod: 2 * 60 * 1000,  //ms
+        dbRecordIdIsSessionId: true,
+        dbRecordIdFunction: undefined,
+      }
+    )
+  })
+);
+
+...
+```
+
+### JavaScript (CommonJS)
+
+```js
+
+const expressSession = require('express-session');
+require('dotenv/config');
+const { PrismaPg } = require('@prisma/adapter-pg');  // For other db adapters, see Prisma docs
+const { PrismaClient } = require('../../generated/prisma/client');
+const { PrismaSessionStore } = require('@quixo3/prisma-session-store');
+
+ // DATABASE_URL defined in env file included in prisma.config.js; see Prisma docs
+const connectionString = `${process.env.DATABASE_URL}`;
+const adapter = new PrismaPg({ connectionString });
+const prisma = new PrismaClient({ adapter });
+
+...
+
+app.use(
+  expressSession({
+    cookie: {
+     maxAge: 7 * 24 * 60 * 60 * 1000 // ms
+    },
+    secret: 'a santa at nasa',
+    resave: true,
+    saveUninitialized: true,
+    store: new PrismaSessionStore(
+      prisma,
+      {
+        checkPeriod: 2 * 60 * 1000,  //ms
+        dbRecordIdIsSessionId: true,
+        dbRecordIdFunction: undefined,
+      }
+    )
+  })
+);
+
+...
+```
+
+## Usage, Prisma 6.x and Below
 
 ### JavaScript (CommonJS)
 
