@@ -1,3 +1,9 @@
+## [3.1.15](https://github.com/kleydon/prisma-session-store/compare/v3.1.14...v3.1.15) (2025-12-24)
+
+### Bug Fixes
+
+- bumped version ([f6fd4ca](https://github.com/kleydon/prisma-session-store/commit/f6fd4ca0b87b9699377221406556a9c5fd9f84ae))
+
 ## [3.1.14](https://github.com/kleydon/prisma-session-store/compare/v3.1.13...v3.1.14) (2025-12-24)
 
 ### Bug Fixes
