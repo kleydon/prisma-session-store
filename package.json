@@ -78,7 +78,7 @@
     "husky": "^9.1.7",
     "jest": "^30.2.0",
     "prettier": "^2.4.1",
-    "pretty-quick": "^3.1.1",
+    "pretty-quick": "^4.2.2",
     "prisma": "^7.2.0",
     "semantic-release": "^25.0.2",
     "supertest": "^7.1.4",
