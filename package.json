@@ -11,7 +11,7 @@
     "PASETO",
     "JWT"
   ],
-  "version": "4.0.2",
+  "version": "4.0.3",
   "license": "MIT",
   "author": "Krispin Leydon",
   "contributors": [
@@ -57,7 +57,7 @@
     "@commitlint/config-conventional": "^20.2.0",
     "@prisma/adapter-better-sqlite3": "^7.2.0",
     "@prisma/client": "^7.2.0",
-    "@semantic-release/changelog": "^6.0.1",
+    "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "@types/better-sqlite3": "^7.6.13",
     "@types/express": "^5.0.6",
@@ -67,7 +67,7 @@
     "@types/supertest": "^2.0.11",
     "@typescript-eslint/eslint-plugin": "^8.50.1",
     "@typescript-eslint/parser": "^8.50.1",
-    "commitizen": "^4.2.4",
+    "commitizen": "^4.3.1",
     "cz-conventional-changelog": "3.3.0",
     "dotenv": "^17.2.3",
     "eslint": "^9.39.2",

@@ -1,28 +1,64 @@
-name: Public Release
+# name: Public Release
 
+# on:
+#   push:
+#     branches:
+#       - master
+
+# permissions:
+#   id-token: write # Required for OIDC
+#   contents: read
+
+# jobs:
+#   build:
+#     if: "!contains(github.event.head_commit.message, 'skip ci')"
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#         with:
+#           persist-credentials: false
+#       - uses: actions/setup-node@v1
+#         with:
+#           node-version: '20.x'
+#       - uses: bahmutov/npm-install@v1
+#       - name: Release
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+#           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+#         run: npx semantic-release
+
+name: Public Release
 on:
   push:
     branches:
-      - master
+      - master # or main
 
 permissions:
-  id-token: write # Required for OIDC
-  contents: read
+  contents: read # for checkout
 
 jobs:
-  build:
-    if: "!contains(github.event.head_commit.message, 'skip ci')"
+  release:
+    name: Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # to be able to publish a GitHub release
+      issues: write # to be able to comment on released issues
+      pull-requests: write # to be able to comment on released pull requests
+      id-token: write # to enable use of OIDC for trusted publishing and npm provenance
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          persist-credentials: false
-      - uses: actions/setup-node@v1
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-      - uses: bahmutov/npm-install@v1
+      - name: Install dependencies
+        run: npm clean-install
+      - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
+        run: npm audit signatures
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx semantic-release
