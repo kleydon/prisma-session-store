@@ -96,3 +96,14 @@ The content of the commit message body should contain:
 
 - information about the SHA of the commit being reverted in the following format: `This reverts commit <SHA>`,
 - a clear description of the reason for reverting the commit message.
+
+### Semantic Release Version Number Sync Issues
+
+The github action that releases the npm package updates the version number within the npm package,
+but does no longer updates the package version number in the github repo, due to token management
+complexity. See: https://semantic-release.gitbook.io/semantic-release/support/faq
+
+Before preparing to merge changes into the master branch, do a dry run locally, using https://github.com/nektos/act
+to determine what the release version number should be, then update the branch to reflect this.
+
+If necessary, bump the version number in a branch as a `chore`, then merge into the master branch (which shouldn't cause a release).
