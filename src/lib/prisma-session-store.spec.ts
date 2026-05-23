@@ -358,6 +358,47 @@ describe('PrismaSessionStore', () => {
       });
     });
 
+    it('should use native MySQL upsert when enableNativeMysqlSetUpsert is true', async () => {
+      const [
+        store,
+        { executeRawUnsafeMock, findUniqueMock, createMock, updateMock },
+      ] = freshStore({
+        enableNativeMysqlSetUpsert: true,
+      });
+
+      await store.set('sid-0', { cookie: { maxAge: 300 }, sample: true });
+
+      expect(executeRawUnsafeMock).toHaveBeenCalledWith(
+        'INSERT INTO `Session` (`id`, `sid`, `expiresAt`, `data`) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `sid` = VALUES(`sid`), `expiresAt` = VALUES(`expiresAt`), `data` = VALUES(`data`)',
+        'sid-0',
+        'sid-0',
+        expect.any(Date),
+        '{"cookie":{"maxAge":300},"sample":true}'
+      );
+      expect(findUniqueMock).not.toHaveBeenCalled();
+      expect(createMock).not.toHaveBeenCalled();
+      expect(updateMock).not.toHaveBeenCalled();
+    });
+
+    it('should send a clear error when native MySQL upsert is enabled without raw execution support', async () => {
+      const [store] = freshStore({
+        enableNativeMysqlSetUpsert: true,
+      });
+      const callback = jest.fn();
+
+      delete (store as unknown as { prisma: { $executeRawUnsafe?: unknown } })
+        .prisma.$executeRawUnsafe;
+
+      await store.set('sid-0', { data: 'a' }, callback);
+
+      expect(callback).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message:
+            'enableNativeMysqlSetUpsert requires a Prisma client exposing $executeRawUnsafe.',
+        })
+      );
+    });
+
     it('should should not reject when errors occur', async () => {
       const stringify = jest.fn();
       const [store] = freshStore({

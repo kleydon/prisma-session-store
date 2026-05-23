@@ -477,32 +477,50 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
       return;
     }
 
-    const existingSession = await this.prisma[this.sessionModelName]
-      .findUnique({
-        where: { sid },
-      })
-      .catch(() => null);
-
     const data = {
       sid,
       expiresAt,
       data: sessionString,
     };
 
+    const id = this.dbRecordIdIsSessionId ? sid : this.dbRecordIdFunction(sid);
+
     try {
-      if (existingSession !== null) {
-        await this.prisma[this.sessionModelName].update({
-          data,
-          where: { sid },
-        });
+      if (this.options.enableNativeMysqlSetUpsert === true) {
+        if (typeof this.prisma.$executeRawUnsafe !== 'function') {
+          throw new Error(
+            'enableNativeMysqlSetUpsert requires a Prisma client exposing $executeRawUnsafe.'
+          );
+        }
+
+        await this.prisma.$executeRawUnsafe(
+          'INSERT INTO `Session` (`id`, `sid`, `expiresAt`, `data`) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `sid` = VALUES(`sid`), `expiresAt` = VALUES(`expiresAt`), `data` = VALUES(`data`)',
+          id,
+          sid,
+          expiresAt,
+          sessionString
+        );
       } else {
-        await this.prisma[this.sessionModelName].create({
-          data: {
-            ...data,
-            id: this.dbRecordIdIsSessionId ? sid : this.dbRecordIdFunction(sid),
-            data: sessionString,
-          },
-        });
+        const existingSession = await this.prisma[this.sessionModelName]
+          .findUnique({
+            where: { sid },
+          })
+          .catch(() => null);
+
+        if (existingSession !== null) {
+          await this.prisma[this.sessionModelName].update({
+            data,
+            where: { sid },
+          });
+        } else {
+          await this.prisma[this.sessionModelName].create({
+            data: {
+              ...data,
+              id,
+              data: sessionString,
+            },
+          });
+        }
       }
     } catch (e: unknown) {
       this.logger.error(`set(): ${String(e)}`);

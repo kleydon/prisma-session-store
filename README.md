@@ -301,6 +301,8 @@ Five new options were added, apart from the work that was already done by [memor
 
 - `enableConcurrentSetInvocationsForSameSessionID` and `enableConcurrentTouchInvocationsForSameSessionID`. Since v3.1.9, concurrent calls to set() and touch() for the same session id have been disabled, as a work-around for an issue that users have been experiencing (see [Issue 88](https://github.com/kleydon/prisma-session-store/issues/88)). This issue may occur when a browser is loading multiple resources for a page in parallel. The issue may be limited to use of SQLite, but has not yet been isolated; `express-session` or `prisma` may be implicated. If necessary, you can prevent this default behavior and re-enable concurrent calls having the same session id by setting one or both of these variables to `true`.
 
+- `enableNativeMysqlSetUpsert`. Disabled by default. When set to `true`, `set()` uses a MySQL / MariaDB native atomic write based on `INSERT ... ON DUPLICATE KEY UPDATE`. This can avoid primary-key race failures caused by concurrent `set()` calls for the same session id. This option is MySQL / MariaDB specific and should not be enabled for other database engines.
+
 ## Methods
 
 `prisma-session-store` implements all the **required**, **recommended** and **optional** methods of the [express-session](https://github.com/expressjs/session#session-store-implementation) store, plus a few more:
