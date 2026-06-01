@@ -56,4 +56,5 @@ export type IPrisma<M extends string = 'session'> = Record<
 > & {
   $connect(): Promise<void>;
   $disconnect(): Promise<void>;
+  $executeRawUnsafe?(query: string, ...values: unknown[]): Promise<unknown>;
 };

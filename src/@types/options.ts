@@ -124,6 +124,19 @@ export interface IOptions<M extends string = 'session'> {
   enableConcurrentTouchInvocationsForSameSessionID?: boolean;
 
   /**
+   * enableNativeMysqlSetUpsert: boolean;
+   *
+   * Enables an atomic MySQL / MariaDB write path for set() using:
+   *   INSERT ... ON DUPLICATE KEY UPDATE
+   *
+   * This avoids the read-then-create race that can occur when multiple
+   * concurrent set() calls use the same session ID.
+   *
+   * Disabled by default because this strategy is MySQL / MariaDB specific.
+   */
+  enableNativeMysqlSetUpsert?: boolean;
+
+  /**
    * A function to generate the Prisma Record ID for a given session ID
    *
    * Note: If undefined and dbRecordIdIsSessionId is also undefined then a random

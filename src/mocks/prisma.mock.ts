@@ -1,6 +1,7 @@
 export const createPrismaMock = () => {
   const connectMock = jest.fn();
   const disconnectMock = jest.fn();
+  const executeRawUnsafeMock = jest.fn();
 
   const createMock = jest.fn();
   const deleteMock = jest.fn();
@@ -19,6 +20,7 @@ export const createPrismaMock = () => {
   const prisma = {
     $connect: connectMock,
     $disconnect: disconnectMock,
+    $executeRawUnsafe: executeRawUnsafeMock,
     session: {
       create: createMock,
       delete: deleteMock,
@@ -40,6 +42,7 @@ export const createPrismaMock = () => {
 
   connectMock.mockResolvedValue(undefined);
   disconnectMock.mockResolvedValue(undefined);
+  executeRawUnsafeMock.mockResolvedValue(undefined);
   findUniqueMock.mockResolvedValue(null);
   findManyMock.mockResolvedValue([]);
   deleteManyMock.mockResolvedValue([]);
@@ -51,6 +54,7 @@ export const createPrismaMock = () => {
     {
       connectMock,
       disconnectMock,
+      executeRawUnsafeMock,
       createMock,
       deleteMock,
       deleteManyMock,
