@@ -220,6 +220,24 @@ Prisma `String` properties are mapped to `VARCHAR(191)` by default. Session data
 
 If you are using a version of Prisma that supports [migrating with native types](https://github.com/prisma/prisma/issues/4330) you can use a type annotation in your `schema.prisma` file instead of manually modifying your data column.
 
+##### Native MySQL / MariaDB upsert for concurrent `set()` calls
+
+For MySQL / MariaDB deployments that experience primary-key race failures during concurrent `set()` calls for the same session id, enable the native atomic write path:
+
+```js
+store: new PrismaSessionStore(
+  prisma,
+  {
+    checkPeriod: 2 * 60 * 1000,
+    dbRecordIdIsSessionId: true,
+    dbRecordIdFunction: undefined,
+    enableNativeMysqlSetUpsert: true,
+  }
+)
+```
+
+When enabled, `set()` uses `INSERT ... ON DUPLICATE KEY UPDATE` instead of the default read-then-create flow. This option is disabled by default and is specific to MySQL / MariaDB.
+
 ## Upgrading from versions following `3.1.9`
 
 Concurrent calls to `set()` and concurrent calls to `touch()` having the same session id are now disallowed by default, as a work-around to address [issue 88](https://github.com/kleydon/prisma-session-store/issues/88). (This issue may surface when a browser is loading multiple resources for a page in parallel). The issue may be limited to SQLite, but hasn't been isolated; `express-session` or `prisma` may be implicated. If necessary, you can prevent the new default behavior, and re-enable concurrent calls having the same session id, by setting one or both of: `enableConcurrentSetInvocationsForSameSessionID`, `enableConcurrentTouchInvocationsForSameSessionID` to `true`; see below.
