@@ -444,7 +444,10 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
     try {
       // If we don't have a valid connection, we can't continue;
       // return early.
-      if (!(await this.validateConnection())) return callback?.();
+      if (!(await this.validateConnection())) {
+        this.isSetting.delete(sid);
+        return callback?.();
+      }
     } catch (e: unknown) {
       this.isSetting.delete(sid);
       throw e;
