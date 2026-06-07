@@ -284,6 +284,24 @@ describe('PrismaSessionStore', () => {
       });
     });
 
+    it('should not permit concurrent creation of two sessions with the same session id', async () => {
+      const [store, { createMock }] = freshStore();
+      await Promise.all([
+        store.set('sid-0', { cookie: {}, sample: true }),
+        store.set('sid-0', { cookie: {}, sample: false }),
+      ]);
+      expect(createMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('should permit concurrent creation two sessions with different session ids', async () => {
+      const [store, { createMock }] = freshStore();
+      await Promise.all([
+        store.set('sid-0', { cookie: {}, sample: true }),
+        store.set('sid-1', { cookie: {}, sample: false }),
+      ]);
+      expect(createMock).toHaveBeenCalledTimes(2);
+    });
+
     it('should update any existing sessions', async () => {
       const [store, { updateMock, findUniqueMock }] = freshStore();
 
