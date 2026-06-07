@@ -466,7 +466,7 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
       this.logger.error(`set(): ${String(e)}`);
       // Clear flag, to indicate that set() operation
       // is no longer in progress for this sid.
-      this.isSetting.set(sid, false);
+      this.isSetting.delete(sid);
       throw e; // Re-throwing to satisfy a test. (Does this make sense?)
     }
 
@@ -477,7 +477,7 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
       this.logger.error(`set(): ${String(e)}`);
       // Clear flag, to indicate that set() operation
       // is no longer in progress for this sid.
-      this.isSetting.set(sid, false);
+      this.isSetting.delete(sid);
       if (callback) defer(callback, e);
 
       return;
@@ -514,7 +514,7 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
       this.logger.error(`set(): ${String(e)}`);
       // Clear flag, to indicate that set() operation
       // is no longer in progress for this sid.
-      this.isSetting.set(sid, false);
+      this.isSetting.delete(sid);
       if (callback) defer(callback, e);
 
       return;
@@ -522,7 +522,7 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
 
     // Clear flag, to indicate that set() operation
     // is no longer in progress for this sid.
-    this.isSetting.set(sid, false);
+    this.isSetting.delete(sid);
 
     if (callback) defer(callback);
   };
