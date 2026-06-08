@@ -435,14 +435,23 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
 
       return callback?.();
     }
-    // If we don't have a valid connection, we can't continue;
-    // return early.
-    if (!(await this.validateConnection())) return callback?.();
 
     // Set a flag to indicate that a set() operation is in progress
     // for this sid. **NOTE**: Be sure this flag is cleared by
     // any/all paths out of this function!
     this.isSetting.set(sid, true);
+
+    try {
+      // If we don't have a valid connection, we can't continue;
+      // return early.
+      if (!(await this.validateConnection())) {
+        this.isSetting.delete(sid);
+        return callback?.();
+      }
+    } catch (e: unknown) {
+      this.isSetting.delete(sid);
+      throw e;
+    }
 
     // Note: Currently, there are two separate try / catch blocks
     // below to satisfy tests. Ultimately, it may be
@@ -460,7 +469,7 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
       this.logger.error(`set(): ${String(e)}`);
       // Clear flag, to indicate that set() operation
       // is no longer in progress for this sid.
-      this.isSetting.set(sid, false);
+      this.isSetting.delete(sid);
       throw e; // Re-throwing to satisfy a test. (Does this make sense?)
     }
 
@@ -471,7 +480,7 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
       this.logger.error(`set(): ${String(e)}`);
       // Clear flag, to indicate that set() operation
       // is no longer in progress for this sid.
-      this.isSetting.set(sid, false);
+      this.isSetting.delete(sid);
       if (callback) defer(callback, e);
 
       return;
@@ -526,7 +535,7 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
       this.logger.error(`set(): ${String(e)}`);
       // Clear flag, to indicate that set() operation
       // is no longer in progress for this sid.
-      this.isSetting.set(sid, false);
+      this.isSetting.delete(sid);
       if (callback) defer(callback, e);
 
       return;
@@ -534,7 +543,7 @@ export class PrismaSessionStore<M extends string = 'session'> extends Store {
 
     // Clear flag, to indicate that set() operation
     // is no longer in progress for this sid.
-    this.isSetting.set(sid, false);
+    this.isSetting.delete(sid);
 
     if (callback) defer(callback);
   };
